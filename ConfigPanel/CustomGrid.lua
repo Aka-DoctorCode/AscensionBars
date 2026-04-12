@@ -12,8 +12,8 @@
 -------------------------------------------------------------------------------
 
 local addonName, addonTable = ...
-local ascensionBars = addonTable.main or LibStub("AceAddon-3.0"):GetAddon(addonName)
-local locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
+local ascensionBars = addonTable.main or _G.LibStub("AceAddon-3.0"):GetAddon(addonName)
+local locales = _G.LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
 local colors = ascensionBars.colors
 local menuStyle = ascensionBars.menuStyle
 
@@ -31,58 +31,71 @@ customGridTab.factionCache = customGridTab.factionCache or {}
 function customGridTab:createVisualCell(parentFrame, cellKey, cellWidth, cellHeight, xPos, yPos, currentAssignment, barNamesMap, barOptions, onSelectCallback)
     if not parentFrame then return nil end
 
-    local cellButton = CreateFrame("Button", "VisualCell_" .. cellKey, parentFrame)
+    local frameName = "AscensionBarsVisualCell_" .. cellKey
+    local cellButton = _G[frameName]
+
+    -- Solo creamos el frame y sus texturas hijas si no existía antes
+    if not cellButton then
+        cellButton = _G.CreateFrame("Button", frameName, parentFrame)
+
+        local bg = cellButton:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        cellButton.bg = bg
+
+        local border = cellButton:CreateTexture(nil, "BORDER")
+        border:SetAllPoints()
+        cellButton.border = border
+
+        local innerBg = cellButton:CreateTexture(nil, "ARTWORK")
+        innerBg:SetPoint("TOPLEFT", cellButton, "TOPLEFT", 1, -1)
+        innerBg:SetPoint("BOTTOMRIGHT", cellButton, "BOTTOMRIGHT", -1, 1)
+        cellButton.innerBg = innerBg
+
+        local label = cellButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        label:SetWordWrap(false)
+        cellButton.label = label
+
+        cellButton:SetScript("OnEnter", function(self)
+            self.border:SetColorTexture(_G.unpack(colors.surfaceHighlight))
+        end)
+        cellButton:SetScript("OnLeave", function(self)
+            self.border:SetColorTexture(_G.unpack(colors.blackDetail))
+        end)
+    end
+
+    -- Actualizamos siempre el frame reciclado/nuevo para que aparezca en la UI correcta
+    cellButton:SetParent(parentFrame)
+    cellButton:Show()
+    cellButton:ClearAllPoints()
     cellButton:SetSize(cellWidth, cellHeight)
     cellButton:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", xPos, yPos)
 
-    local bg = cellButton:CreateTexture(nil, "BACKGROUND")
-    bg:SetAllPoints()
-    cellButton.bg = bg
-
-    local border = cellButton:CreateTexture(nil, "BORDER")
-    border:SetAllPoints()
-    border:SetColorTexture(unpack(colors.blackDetail))
-    cellButton.border = border
-
-    local innerBg = cellButton:CreateTexture(nil, "ARTWORK")
-    innerBg:SetPoint("TOPLEFT", cellButton, "TOPLEFT", 1, -1)
-    innerBg:SetPoint("BOTTOMRIGHT", cellButton, "BOTTOMRIGHT", -1, 1)
-    cellButton.innerBg = innerBg
-
-    -- Use GameFontNormal for better scaling
-    local label = cellButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    label:SetPoint("CENTER", cellButton, "CENTER", 0, 0)
-    label:SetWidth(cellWidth - menuStyle.contentPadding)
-    label:SetWordWrap(false)
+    cellButton.border:SetColorTexture(_G.unpack(colors.blackDetail))
+    cellButton.label:ClearAllPoints()
+    cellButton.label:SetPoint("CENTER", cellButton, "CENTER", 0, 0)
+    cellButton.label:SetWidth(cellWidth - menuStyle.contentPadding)
 
     if currentAssignment == "none" or not currentAssignment then
-        innerBg:SetColorTexture(unpack(colors.surfaceDark))
-        label:SetText("+ " .. (locales["EMPTY"] or "Empty"))
-        label:SetTextColor(unpack(colors.textDim))
+        cellButton.innerBg:SetColorTexture(_G.unpack(colors.surfaceDark))
+        cellButton.label:SetText("+ " .. (locales["EMPTY"] or "Empty"))
+        cellButton.label:SetTextColor(_G.unpack(colors.textDim))
     else
-        innerBg:SetColorTexture(unpack(colors.primary))
-        innerBg:SetAlpha(0.5)  -- semi-transparent for assigned cells
-        local displayName = barNamesMap[currentAssignment] or currentAssignment
-        label:SetText(displayName)
-        label:SetTextColor(unpack(colors.textLight))
+        cellButton.innerBg:SetColorTexture(_G.unpack(colors.primary))
+        cellButton.innerBg:SetAlpha(0.5)
+        local displayName = (barNamesMap and barNamesMap[currentAssignment]) and barNamesMap[currentAssignment] or currentAssignment
+        cellButton.label:SetText(displayName)
+        cellButton.label:SetTextColor(_G.unpack(colors.textLight))
     end
 
-    cellButton:SetScript("OnEnter", function(self)
-        self.border:SetColorTexture(unpack(colors.surfaceHighlight))
-    end)
-
-    cellButton:SetScript("OnLeave", function(self)
-        self.border:SetColorTexture(unpack(colors.blackDetail))
-    end)
-
+    -- Re-bind the click behavior with updated callback
     cellButton:SetScript("OnClick", function(self)
-        if MenuUtil and MenuUtil.CreateContextMenu then
-            MenuUtil.CreateContextMenu(self, function(owner, rootDesc)
+        if _G.MenuUtil and _G.MenuUtil.CreateContextMenu then
+            _G.MenuUtil.CreateContextMenu(self, function(owner, rootDesc)
                 rootDesc:CreateTitle(locales["ASSIGN_BAR"] or "Assign Bar")
                 rootDesc:CreateButton(locales["NONE"] or "None", function()
                     if onSelectCallback then onSelectCallback("none") end
                 end)
-                for _, opt in ipairs(barOptions) do
+                for _, opt in _G.ipairs(barOptions) do
                     rootDesc:CreateButton(opt.label, function()
                         if onSelectCallback then onSelectCallback(opt.value) end
                     end)
@@ -167,29 +180,50 @@ end
 -------------------------------------------------------------------------------
 local function buildCellGrid(panel, blockKey, grid, blockX, blockWidth, barKeys, barNames, barNamesMap, layoutCol)
     local validBarOptions = {}
-    for i, bKey in ipairs(barKeys) do
-        table.insert(validBarOptions, { label = barNames[i], value = bKey })
+    for i, bKey in _G.ipairs(barKeys) do
+        _G.table.insert(validBarOptions, { label = barNames[i], value = bKey })
     end
 
     local cellHeight = 35
-    local rowStartY = layoutCol.y
-    local maxDescentY = rowStartY
+    local stepperWidth = 100 
+    local horizontalGap = 10 
+    local rowSpacing = 40    -- Sufficient to prevent overlap of 35px cells
+    local startY = layoutCol.y
 
     for r = 1, grid.numRows do
+        local rowTopY = startY
+        
+        -- 1. Stepper: Manually reset cursor to ignore internal factory labels
+        layoutCol.y = rowTopY
+        layoutCol:stepper("GridCols_" .. blockKey .. "_" .. r, "", 1, 4, 1,
+            function() return grid.colsPerRow[r] or 1 end,
+            function(v)
+                grid.colsPerRow[r] = v
+                grid.assignments[r] = grid.assignments[r] or {}
+                for c = 1, v do grid.assignments[r][c] = grid.assignments[r][c] or "none" end
+                ascensionBars:updateDisplay()
+                if panel and panel.updateLayout then panel:updateLayout() end
+            end, stepperWidth, blockX)
+
+        -- 2. Visual Cells: Mathematically aligned center-to-center with stepper
+        -- Stepper center is at rowTopY - 22. Cell (35px) center is cellVisualY - 17.5.
+        -- Aligning both centers results in cellVisualY = rowTopY - 4.5
+        local cellVisualY = rowTopY - 4.5 
         local cols = grid.colsPerRow[r] or 1
-        local cellWidth = blockWidth / cols
+        local availableWidth = blockWidth - stepperWidth - horizontalGap
+        local cellWidth = availableWidth / cols
         grid.assignments[r] = grid.assignments[r] or {}
 
         for c = 1, cols do
-            local cellX = blockX + (c - 1) * cellWidth
+            local cellX = blockX + stepperWidth + horizontalGap + (c - 1) * cellWidth
             local currentAssig = grid.assignments[r][c] or "none"
+            
             customGridTab:createVisualCell(panel.content, blockKey .. "_" .. r .. "_" .. c,
-                cellWidth - menuStyle.contentPadding, cellHeight,
-                cellX, rowStartY,
+                cellWidth - 4, cellHeight,
+                cellX, cellVisualY,
                 currentAssig, barNamesMap, validBarOptions,
                 function(selectedValue)
                     if selectedValue ~= "none" then
-                        -- Remove from any other cell
                         for scanR = 1, grid.numRows do
                             local scanCols = grid.colsPerRow[scanR] or 1
                             for scanC = 1, scanCols do
@@ -201,32 +235,33 @@ local function buildCellGrid(panel, blockKey, grid, blockX, blockWidth, barKeys,
                     end
                     grid.assignments[r][c] = selectedValue
                     ascensionBars:updateDisplay()
-                    if panel.updateLayout then panel:updateLayout() end
+                    if panel and panel.updateLayout then panel:updateLayout() end
                 end)
         end
-        rowStartY = rowStartY - cellHeight - menuStyle.labelSpacing / 2
-        layoutCol.y = rowStartY
+        
+        -- Advance to next row position
+        startY = startY - rowSpacing
     end
 
-    layoutCol.y = layoutCol.y - menuStyle.contentPadding
+    -- Update layout model Y for subsequent elements (like toggles)
+    layoutCol.y = startY - 10
 end
 
 -------------------------------------------------------------------------------
 -- HELPER: Build toggle list for bars in a block
 -------------------------------------------------------------------------------
 local function buildBarToggles(panel, blockKey, barKeys, barNames, blockX, blockWidth, layoutCol)
-    layoutCol:label("GridSubToggleHeader_" .. blockKey, locales["ENABLE"] or "Enable", blockX + menuStyle.contentPadding / 2, colors.gold)
+    layoutCol:label("GridSubToggleHeader_" .. blockKey, locales["ENABLE"] or "Enable", blockX + menuStyle.contentPadding / 2, colors.gold) -- #FFD100
     layoutCol.y = layoutCol.y - menuStyle.labelSpacing / 2
 
     local toggleStartY = layoutCol.y
     local maxTglDescentY = toggleStartY
     local toggleCount = 0
 
-    for i, bKey in ipairs(barKeys) do
+    for i, bKey in _G.ipairs(barKeys) do
         local bConf = ascensionBars.db.profile.bars[bKey]
         if bConf and (bConf.block or "TOP") == blockKey then
             toggleCount = toggleCount + 1
-            local tW = (blockWidth / 3) - menuStyle.contentPadding
             local tX = blockX + menuStyle.contentPadding / 2 + ((toggleCount - 1) % 3) * (blockWidth / 3)
 
             layoutCol.y = toggleStartY
@@ -276,7 +311,7 @@ local function buildGridBlock(panel, blockKey, blockName, startY, availableWidth
     header:SetWidth(availableWidth - menuStyle.contentPadding * 2)
     header:SetJustifyH("CENTER")
     header:SetText(blockName)
-    header:SetTextColor(unpack(colors.gold))
+    header:SetTextColor(_G.unpack(colors.gold)) -- #FFD100
     layoutCol.y = startY - menuStyle.headerSpacing
 
     -- Enable checkbox
@@ -290,37 +325,33 @@ local function buildGridBlock(panel, blockKey, blockName, startY, availableWidth
                 applyPresetToGrid(grid, "2X2")
             end
             ascensionBars:updateDisplay()
-            if panel.updateLayout then panel:updateLayout() end
+            if panel and panel.updateLayout then panel:updateLayout() end
         end, menuStyle.contentPadding)
 
     layoutCol.y = layoutCol.y - menuStyle.labelSpacing
 
     if grid.enabled then
-        -- Preset controls
         buildPresetControls(panel, blockKey, grid, menuStyle.contentPadding, availableWidth, layoutCol)
+        
+        -- Counter-act factory padding to keep grid close to presets
+        layoutCol.y = layoutCol.y + 12 
 
-        layoutCol.y = layoutCol.y - menuStyle.labelSpacing
-
-        -- Get bars belonging to this block
-        local barKeys = {}
-        local barNames = {}
-        local barNamesMap = {}
-        for k, cfg in pairs(profile.bars) do
+        local barKeys, barNames, barNamesMap = {}, {}, {}
+        for k, cfg in _G.pairs(profile.bars) do
             if (cfg.block or "TOP") == blockKey then
-                table.insert(barKeys, k)
+                _G.table.insert(barKeys, k)
                 local name = cfg.name or k
-                table.insert(barNames, name)
+                _G.table.insert(barNames, name)
                 barNamesMap[k] = name
             end
         end
 
-        -- Build cell grid
-        buildCellGrid(panel, blockKey, grid, menuStyle.contentPadding, availableWidth,
-                      barKeys, barNames, barNamesMap, layoutCol)
+        buildCellGrid(panel, blockKey, grid, menuStyle.contentPadding, availableWidth, barKeys, barNames, barNamesMap, layoutCol)
 
-        layoutCol.y = layoutCol.y - menuStyle.labelSpacing
+        -- Compact spacing before toggles
+        layoutCol.y = layoutCol.y - 4
 
-        -- Bar toggles
+        -- Bar individual visibility toggles
         buildBarToggles(panel, blockKey, barKeys, barNames, menuStyle.contentPadding, availableWidth, layoutCol)
     end
 
@@ -334,10 +365,10 @@ local function updateFactionCache()
     local globalCache = customGridTab.factionCache
     local currentExpansionName = ""
 
-    if C_Reputation and C_Reputation.GetNumFactions then
-        local numFactions = C_Reputation.GetNumFactions()
+    if _G.C_Reputation and _G.C_Reputation.GetNumFactions then
+        local numFactions = _G.C_Reputation.GetNumFactions()
         for i = 1, numFactions do
-            local fData = C_Reputation.GetFactionDataByIndex(i)
+            local fData = _G.C_Reputation.GetFactionDataByIndex(i)
             if fData and fData.factionID and fData.name then
                 if fData.isHeader then
                     currentExpansionName = fData.name
@@ -380,13 +411,12 @@ local function buildReputationSection(panel, startY, availableWidth)
     layoutRep.y = searchRowY
     layoutRep:input("SearchFactionInput", locales["SEARCH_FACTION"] or "Search:", searchWidth, marginX, function(text)
         customGridTab.searchFactionText = text
-        C_Timer.After(0.01, function()
-            if panel.updateLayout then panel:updateLayout() end
+        _G.C_Timer.After(0.01, function()
+            if panel and panel.updateLayout then panel:updateLayout() end
         end)
     end)
 
-    -- Update faction cache if needed
-    if not next(customGridTab.factionCache) then
+    if not _G.next(customGridTab.factionCache) then
         updateFactionCache()
     end
 
@@ -480,9 +510,9 @@ function customGridTab:build(panel)
     local headerTitle = headerFrame:CreateFontString(nil, "OVERLAY", menuStyle.headerFont)
     headerTitle:SetPoint("TOPLEFT", 0, 0)
     headerTitle:SetText(locales["CUSTOM_GRID"] or "Custom Grid")
-    headerTitle:SetTextColor(unpack(colors.gold))
+    headerTitle:SetTextColor(_G.unpack(colors.gold)) -- #FFD100
 
-    local masterToggle = CreateFrame("CheckButton", nil, headerFrame, "UICheckButtonTemplate")
+    local masterToggle = _G.CreateFrame("CheckButton", nil, headerFrame, "UICheckButtonTemplate")
     masterToggle:SetSize(menuStyle.checkboxSize, menuStyle.checkboxSize)
     masterToggle:SetPoint("LEFT", headerFrame, "LEFT", 160, -2)
     masterToggle:SetChecked(profile.customGridMasterEnabled)

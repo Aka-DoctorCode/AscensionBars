@@ -23,6 +23,42 @@ addonTable.profilesTab = {}
 local profilesTab = addonTable.profilesTab
 
 -------------------------------------------------------------------------------
+-- Styled Button Helper (matches the addon's BackdropTemplate button style)
+-------------------------------------------------------------------------------
+local function createStyledButton(parent, w, h, labelText, onClick)
+    local files = ascensionBars.files
+    local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
+    btn:SetSize(w, h)
+    btn:SetBackdrop({
+        bgFile   = files.bgFile,
+        edgeFile = files.edgeFile,
+        edgeSize = 1,
+        insets   = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    btn:SetBackdropColor(unpack(colors.surfaceHighlight))
+    btn:SetBackdropBorderColor(unpack(colors.blackDetail))
+
+    local btnLabel = btn:CreateFontString(nil, "OVERLAY", menuStyle.labelFont)
+    btnLabel:SetPoint("CENTER", 0, 0)
+    btnLabel:SetText(labelText)
+    btnLabel:SetTextColor(unpack(colors.textLight))
+    btn.label = btnLabel
+
+    btn:SetScript("OnEnter", function(self)
+        self:SetBackdropColor(unpack(colors.primary))
+        self:SetBackdropBorderColor(unpack(colors.textLight))
+    end)
+    btn:SetScript("OnLeave", function(self)
+        self:SetBackdropColor(unpack(colors.surfaceHighlight))
+        self:SetBackdropBorderColor(unpack(colors.blackDetail))
+    end)
+    btn:SetScript("OnMouseDown", function(self) self.label:SetPoint("CENTER", 1, -1) end)
+    btn:SetScript("OnMouseUp",   function(self) self.label:SetPoint("CENTER", 0,  0) end)
+    btn:SetScript("OnClick", function() if onClick then onClick() end end)
+    return btn
+end
+
+-------------------------------------------------------------------------------
 -- UI Refresh Helper
 -------------------------------------------------------------------------------
 local function refreshConfigPanel()
@@ -82,20 +118,16 @@ local function showConfirmDialog(message, onConfirm)
     text:SetWidth(280)
     text:SetText(message)
 
-    local yes = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
-    yes:SetSize(80, 30)
-    yes:SetPoint("BOTTOMRIGHT", -10, 10)
-    yes:SetText(L["YES"] or "Yes")
-    yes:SetScript("OnClick", function()
+    local yes = createStyledButton(dialog, 80, 30, L["YES"] or "Yes", function()
         if onConfirm then onConfirm() end
         dialog:Hide()
     end)
+    yes:SetPoint("BOTTOMRIGHT", -10, 10)
 
-    local no = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
-    no:SetSize(80, 30)
+    local no = createStyledButton(dialog, 80, 30, L["NO"] or "No", function()
+        dialog:Hide()
+    end)
     no:SetPoint("BOTTOMLEFT", 10, 10)
-    no:SetText(L["NO"] or "No")
-    no:SetScript("OnClick", function() dialog:Hide() end)
 
     dialog:Show()
 end
@@ -208,24 +240,18 @@ local function showDataPopup(title, isImport)
         frame.editBox:SetAutoFocus(false) -- Prevent stealing focus on show
         scroll:SetScrollChild(frame.editBox)
 
-        -- Close Button
-        local closeBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-        closeBtn:SetSize(100, 30)
+        local closeBtn = createStyledButton(frame, 100, 30, L["CLOSE"] or "Close", function()
+            frame:Hide()
+        end)
         closeBtn:SetPoint("BOTTOMRIGHT", -20, 15)
-        closeBtn:SetText(L["CLOSE"] or "Close")
-        closeBtn:SetScript("OnClick", function() frame:Hide() end)
 
-        -- Import Button (Create it once, hide it by default)
-        frame.importBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-        frame.importBtn:SetSize(100, 30)
-        frame.importBtn:SetPoint("BOTTOMLEFT", 20, 15)
-        frame.importBtn:SetText(L["IMPORT"] or "Import")
-        frame.importBtn:SetScript("OnClick", function()
+        frame.importBtn = createStyledButton(frame, 100, 30, L["IMPORT"] or "Import", function()
             if importProfileData(frame.editBox:GetText()) then
                 frame:Hide()
                 refreshConfigPanel()
             end
         end)
+        frame.importBtn:SetPoint("BOTTOMLEFT", 20, 15)
     end
 
     -- Update Frame Content based on mode (Import vs Export)
@@ -260,6 +286,14 @@ function profilesTab:build(panel)
     local currentProfile = db:GetCurrentProfile()
     local layout = addonTable.layoutModel:new(content, 0)
     local currentY = -15
+
+    local profileIndicator = content:CreateFontString(nil, "OVERLAY", menuStyle.headerFont)
+    profileIndicator:SetPoint("TOPLEFT", 15, currentY)
+    profileIndicator:SetText("Active Profile:  " .. currentProfile)
+    profileIndicator:SetTextColor(unpack(colors.gold))
+    local indicatorH = profileIndicator:GetStringHeight()
+    if indicatorH == 0 then indicatorH = 16 end
+    currentY = currentY - indicatorH - 20
 
     -- ==========================================
     -- 2. New & Existing Profiles Section
@@ -342,27 +376,40 @@ function profilesTab:build(panel)
     currentY = currentY - 70
 
     -- ==========================================
+    -- 3b. Reset Current Profile
+    -- ==========================================
+    local _, hReset = createDescText(content, "Restore the current profile to its default settings. This cannot be undone.", currentY)
+    currentY = currentY - hReset - 15
+
+    local resetBtn = createStyledButton(content, 200, 35, L["FACTION_STANDINGS_RESET"] or "Reset Current Profile", function()
+        showConfirmDialog(
+            "Reset profile '" .. currentProfile .. "' to defaults? This cannot be undone.",
+            function()
+                pcall(function() db:ResetProfile() end)
+                refreshConfigPanel()
+            end
+        )
+    end)
+    resetBtn:SetPoint("TOPLEFT", 20, currentY)
+
+    currentY = currentY - 55
+
+    -- ==========================================
     -- 4. Import & Export Section
     -- ==========================================
     currentY = currentY - 20
     local _, h7 = createDescText(content, L["IMPORT_EXPORT_DESC"] or "Share your configuration with others.", currentY)
     currentY = currentY - h7 - 25
 
-    local exportBtn = CreateFrame("Button", nil, content, "UIPanelButtonTemplate")
-    exportBtn:SetSize(160, 35)
-    exportBtn:SetPoint("TOPLEFT", 20, currentY)
-    exportBtn:SetText(L["EXPORT_PROFILE"] or "Export Profile")
-    exportBtn:SetScript("OnClick", function()
+    local exportBtn = createStyledButton(content, 160, 35, L["EXPORT_PROFILE"] or "Export Profile", function()
         showDataPopup(L["EXPORT_PROFILE"] or "Export Profile", false)
     end)
+    exportBtn:SetPoint("TOPLEFT", 20, currentY)
 
-    local importBtn = CreateFrame("Button", nil, content, "UIPanelButtonTemplate")
-    importBtn:SetSize(160, 35)
-    importBtn:SetPoint("LEFT", exportBtn, "RIGHT", 20, 0)
-    importBtn:SetText(L["IMPORT_PROFILE"] or "Import Profile")
-    importBtn:SetScript("OnClick", function()
+    local importBtn = createStyledButton(content, 160, 35, L["IMPORT_PROFILE"] or "Import Profile", function()
         showDataPopup(L["IMPORT_PROFILE"] or "Import Profile", true)
     end)
+    importBtn:SetPoint("LEFT", exportBtn, "RIGHT", 20, 0)
 
     currentY = currentY - 80
     content:SetHeight(math.abs(currentY))

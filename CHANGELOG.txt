@@ -1,6 +1,15 @@
-<h1>@project-version@</h1>
+  <h1>@project-version@</h1>
 <ul>
-    <li>Several performance improvements</li>
+    <li>Reset profile button move to the profile tab</li>
+    <li>All button astetic have been updated to use the add on theme instead of the default WoW theme</li>
+    <li>Russian localization added to .toc</li>
+    <li>Add: Reset profile confirmation prompt added</li>
+    <li>Add: press "esc" to close the config panel</li>
+    <li>Add: Dropdown menu can now be closed by clicking outside the dropdown menu</li>
+    <li>Fix: Named frames were crated multiple times</li>
+    <li>Fix: Show rested bar toggle was duplicated, now the one on the color tab is the only one</li>
+    <li>Fix: Add custom faction dropdown max height</li>
+    <li>Fix: Throttle updates when changes are made to sliders</li>
 </ul>
 <br>
 <h3>Positive feedback is always appreciated, it helps me to continue working on this project</h3>

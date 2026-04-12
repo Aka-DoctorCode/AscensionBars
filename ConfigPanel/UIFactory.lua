@@ -23,6 +23,99 @@ local menuStyle = ascensionBars.menuStyle
 addonTable.layoutFactory = {}
 local layoutFactory = addonTable.layoutFactory
 
+local activeDropdownList = nil
+local function closeActiveDropdown()
+    if activeDropdownList and activeDropdownList:IsShown() then
+        activeDropdownList:Hide()
+    end
+    activeDropdownList = nil
+    if _G.AscensionBarsDropdownBlocker then _G.AscensionBarsDropdownBlocker:Hide() end
+end
+
+local function createStepButton(parent, symbol, size, onClick)
+    local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
+    btn:SetSize(size, size)
+    btn:SetBackdrop({
+        bgFile   = files.bgFile,
+        edgeFile = files.edgeFile,
+        edgeSize = 1,
+        insets   = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    btn:SetBackdropColor(unpack(colors.surfaceHighlight))
+    btn:SetBackdropBorderColor(unpack(colors.blackDetail))
+
+    local texBar = ascensionBars.constants.TEXTURE_BAR
+    local iconTextures = {}
+
+    local hLine = btn:CreateTexture(nil, "OVERLAY")
+    hLine:SetTexture(texBar)
+    hLine:SetSize(12, 2)
+    hLine:SetPoint("CENTER", 0, 0)
+    hLine:SetVertexColor(unpack(colors.textLight))
+    table.insert(iconTextures, hLine)
+
+    if symbol == "+" then
+        local vLine = btn:CreateTexture(nil, "OVERLAY")
+        vLine:SetTexture(texBar)
+        vLine:SetSize(2, 12)
+        vLine:SetPoint("CENTER", 0, 0)
+        vLine:SetVertexColor(unpack(colors.textLight))
+        table.insert(iconTextures, vLine)
+    end
+
+    btn.iconTextures = iconTextures
+
+    local function setIconColor(r, g, b)
+        for _, tex in ipairs(iconTextures) do
+            tex:SetVertexColor(r, g, b, 1)
+        end
+    end
+
+    btn:SetScript("OnEnter", function(self)
+        self:SetBackdropColor(unpack(colors.primary))
+        self:SetBackdropBorderColor(unpack(colors.textLight))
+        setIconColor(1, 1, 1)
+    end)
+    btn:SetScript("OnLeave", function(self)
+        self:SetBackdropColor(unpack(colors.surfaceHighlight))
+        self:SetBackdropBorderColor(unpack(colors.blackDetail))
+        self._holding = false
+        setIconColor(unpack(colors.textLight))
+    end)
+    btn:SetScript("OnMouseDown", function(self)
+        for _, tex in ipairs(self.iconTextures) do
+            tex:ClearAllPoints()
+            tex:SetPoint("CENTER", 1, -1)
+        end
+        onClick()
+        self._holdId = (self._holdId or 0) + 1
+        local currentHold = self._holdId
+        self._holding = true
+        C_Timer.After(0.4, function()
+            local function doRepeat()
+                if not self:IsVisible() then self._holding = false end
+                -- Only continue if we are STILL holding from the EXACT same initial mouse click
+                if self._holding and self._holdId == currentHold then
+                    onClick()
+                    C_Timer.After(0.08, doRepeat)
+                end
+            end
+            if not self:IsVisible() then self._holding = false end
+            if self._holding and self._holdId == currentHold then
+                doRepeat()
+            end
+        end)
+    end)
+    btn:SetScript("OnMouseUp", function(self)
+        for _, tex in ipairs(self.iconTextures) do
+            tex:ClearAllPoints()
+            tex:SetPoint("CENTER", 0, 0)
+        end
+        self._holding = false
+    end)
+    return btn
+end
+
 -- Helper function to fetch specific element overrides
 local function getStyle(elementID)
     if not ascensionBars.db or not ascensionBars.db.profile then return {} end
@@ -193,32 +286,19 @@ function layoutFactory:createSlider(args)
         self:ClearFocus()
     end)
 
-    -- Botón "-" a la izquierda de la caja
-    local btnMinus = CreateFrame("Button", nil, controlsFrame, "UIPanelButtonTemplate")
-    btnMinus:SetSize(btnSize, btnSize)
-    btnMinus:SetText("-")
-    local minusFont = btnMinus:GetFontString()
-    if minusFont then
-        minusFont:SetFontObject(menuStyle.labelFont)
-    end
+    local btnMinus = createStepButton(controlsFrame, "-", btnSize, function() updateValue(slider:GetValue() - step) end)
     btnMinus:SetPoint("RIGHT", editBox, "LEFT", -12, 0)
-    btnMinus:SetScript("OnClick", function() updateValue(slider:GetValue() - step) end)
 
-    -- Botón "+" a la derecha de la caja
-    local btnPlus = CreateFrame("Button", nil, controlsFrame, "UIPanelButtonTemplate")
-    btnPlus:SetSize(btnSize, btnSize)
-    btnPlus:SetText("+")
-    local plusFont = btnPlus:GetFontString()
-    if plusFont then
-        plusFont:SetFontObject(menuStyle.labelFont)
-    end
+    local btnPlus = createStepButton(controlsFrame, "+", btnSize, function() updateValue(slider:GetValue() + step) end)
     btnPlus:SetPoint("LEFT", editBox, "RIGHT", 12, 0)
-    btnPlus:SetScript("OnClick", function() updateValue(slider:GetValue() + step) end)
 
     -- Actualizar la caja cuando el slider cambie (por arrastre)
     slider:SetScript("OnValueChanged", function(_, value)
         editBox:SetText(tostring(math.floor(value * 100) / 100))
-        setter(value)
+    end)
+
+    slider:SetScript("OnMouseUp", function(self)
+        setter(self:GetValue())
     end)
 
     -- Calcular la coordenada Y para el siguiente elemento
@@ -286,23 +366,11 @@ function layoutFactory:createStepper(args)
         self:ClearFocus()
     end)
 
-    -- Minus Button
-    local btnMinus = CreateFrame("Button", nil, controlsFrame, "UIPanelButtonTemplate")
-    btnMinus:SetSize(btnSize, btnSize)
-    btnMinus:SetText("-")
-    local minusFont = btnMinus:GetFontString()
-    if minusFont then minusFont:SetFontObject(menuStyle.labelFont) end
+    local btnMinus = createStepButton(controlsFrame, "-", btnSize, function() updateValue(editBox, getter() - step) end)
     btnMinus:SetPoint("RIGHT", editBox, "LEFT", -8, 0)
-    btnMinus:SetScript("OnClick", function() updateValue(editBox, getter() - step) end)
 
-    -- Plus Button
-    local btnPlus = CreateFrame("Button", nil, controlsFrame, "UIPanelButtonTemplate")
-    btnPlus:SetSize(btnSize, btnSize)
-    btnPlus:SetText("+")
-    local plusFont = btnPlus:GetFontString()
-    if plusFont then plusFont:SetFontObject(menuStyle.labelFont) end
+    local btnPlus = createStepButton(controlsFrame, "+", btnSize, function() updateValue(editBox, getter() + step) end)
     btnPlus:SetPoint("LEFT", editBox, "RIGHT", 8, 0)
-    btnPlus:SetScript("OnClick", function() updateValue(editBox, getter() + step) end)
 
     local labelHeight = labelString:GetHeight() or 14
     local totalDescent = labelHeight + 8 + btnSize + 16
@@ -347,14 +415,14 @@ function layoutFactory:createColorPicker(args)
     local function colorCallback(restore)
         local colorPicker = _G["ColorPickerFrame"]
         local r, g, b, a
-        if restore then
+        if type(restore) == "table" then
             r, g, b, a = unpack(restore)
         else
-            if colorPicker.GetColorRGB then
+            if colorPicker and colorPicker.GetColorRGB then
                 r, g, b = colorPicker:GetColorRGB()
             end
-            a = (colorPicker.GetColorAlpha and colorPicker:GetColorAlpha()) or
-                (colorPicker.GetColorOpacity and 1 - colorPicker:GetColorOpacity()) or 1
+            a = (colorPicker and colorPicker.GetColorAlpha and colorPicker:GetColorAlpha()) or
+                (colorPicker and colorPicker.GetColorOpacity and 1 - colorPicker:GetColorOpacity()) or 1
         end
         local finalAlpha = a or 1
         setter(r or 1, g or 1, b or 1, finalAlpha)
@@ -374,9 +442,9 @@ function layoutFactory:createColorPicker(args)
             r = r or 1, g = g or 1, b = b or 1
         }
 
-        if colorPicker.SetupColorPickerAndShow then
+        if colorPicker and colorPicker.SetupColorPickerAndShow then
             colorPicker:SetupColorPickerAndShow(info)
-        else
+        elseif colorPicker then
             colorPicker.func = info.swatchFunc
             colorPicker.opacityFunc = info.opacityFunc
             colorPicker.cancelFunc = info.cancelFunc
@@ -457,15 +525,51 @@ function layoutFactory:createDropdown(args)
     list:SetBackdropBorderColor(unpack(colors.surfaceHighlight)) -- #2A243D
 
     dropdown:SetScript("OnClick", function()
-        if list:IsShown() then list:Hide() else list:Show() end
+        if not _G.AscensionBarsDropdownBlocker then
+            local blocker = CreateFrame("Button", "AscensionBarsDropdownBlocker", _G.UIParent)
+            blocker:SetAllPoints()
+            -- FrameStrata should be right below TOOLTIP (which the list uses)
+            blocker:SetFrameStrata("FULLSCREEN_DIALOG")
+            blocker:Hide()
+            blocker:SetScript("OnClick", closeActiveDropdown)
+        end
+
+        if list:IsShown() then
+            closeActiveDropdown()
+        else
+            closeActiveDropdown()
+            -- Ensure list is actually strictly above the blocker
+            list:SetFrameStrata("TOOLTIP")
+            list:Show()
+            activeDropdownList = list
+            _G.AscensionBarsDropdownBlocker:Show()
+        end
     end)
 
-    list:SetHeight(#options * 20 + 10)
+    local itemH = 20
+    local maxListH = 200
+    local totalH = #options * itemH + 10
+    list:SetHeight(math.min(totalH, maxListH))
+    list:SetClipsChildren(true)
+
+    local btnContainer = CreateFrame("Frame", nil, list)
+    btnContainer:SetSize(dropWidth, totalH)
+    btnContainer:SetPoint("TOPLEFT", 0, 0)
+
+    if totalH > maxListH then
+        list:EnableMouseWheel(true)
+        local scrollY = 0
+        local maxScrollY = totalH - maxListH
+        list:SetScript("OnMouseWheel", function(_, delta)
+            scrollY = math.max(0, math.min(maxScrollY, scrollY - delta * itemH))
+            btnContainer:SetPoint("TOPLEFT", 0, scrollY)
+        end)
+    end
 
     for i, opt in ipairs(options) do
-        local btn = CreateFrame("Button", nil, list, "BackdropTemplate")
-        btn:SetSize(dropWidth - 10, 20)
-        btn:SetPoint("TOPLEFT", 5, -5 - ((i - 1) * 20))
+        local btn = CreateFrame("Button", nil, btnContainer, "BackdropTemplate")
+        btn:SetSize(dropWidth - 10, itemH)
+        btn:SetPoint("TOPLEFT", 5, -5 - ((i - 1) * itemH))
         btn:SetBackdrop({ bgFile = files.bgFile })
         btn:SetBackdropColor(unpack(colors.surfaceDark)) -- #0C0A15
 
@@ -478,7 +582,7 @@ function layoutFactory:createDropdown(args)
         btn:SetScript("OnClick", function()
             setter(opt.value)
             dropdownText:SetText(opt.label)
-            list:Hide()
+            closeActiveDropdown()
         end)
     end
 
@@ -596,13 +700,49 @@ function layoutFactory:createButton(args)
     local actualWidth = width or 120
     local actualHeight = height or 28
 
-    local btn = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    -- Create modern button using BackdropTemplate for custom styling
+    local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
+    btn.elementID = elementID
     btn:SetSize(actualWidth, actualHeight)
     btn:SetPoint("TOPLEFT", actualX, yOffset)
-    btn:SetText(text)
+    
+    -- Ensure the button stays above background textures and containers
+    btn:SetFrameLevel(parent:GetFrameLevel() + 10)
 
-    local btnFont = btn:GetFontString()
-    if btnFont then btnFont:SetFontObject(menuStyle.labelFont) end
+    -- Apply custom visual style
+    btn:SetBackdrop({
+        bgFile = files.bgFile,
+        edgeFile = files.edgeFile,
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    btn:SetBackdropColor(unpack(colors.surfaceHighlight)) -- #2A243D
+    btn:SetBackdropBorderColor(unpack(colors.blackDetail)) -- #000000
+
+    local btnText = btn:CreateFontString(nil, "OVERLAY", menuStyle.labelFont)
+    btnText:SetPoint("CENTER", 0, 0)
+    btnText:SetText(text)
+    btnText:SetTextColor(unpack(colors.textLight)) -- #E2E8F0
+    btn.text = btnText
+
+    -- Hover and Click interactions
+    btn:SetScript("OnEnter", function(self)
+        self:SetBackdropColor(unpack(colors.primary)) -- #7F13EC
+        self:SetBackdropBorderColor(unpack(colors.textLight)) -- #E2E8F0
+    end)
+
+    btn:SetScript("OnLeave", function(self)
+        self:SetBackdropColor(unpack(colors.surfaceHighlight)) -- #2A243D
+        self:SetBackdropBorderColor(unpack(colors.blackDetail)) -- #000000
+    end)
+
+    btn:SetScript("OnMouseDown", function(self)
+        self.text:SetPoint("CENTER", 1, -1)
+    end)
+
+    btn:SetScript("OnMouseUp", function(self)
+        self.text:SetPoint("CENTER", 0, 0)
+    end)
 
     btn:SetScript("OnClick", function()
         if onClick then onClick() end
@@ -630,8 +770,8 @@ function layoutFactory:createTabbedInterface(parent, tabNames, buildFuncs, initi
                 tab:SetBackdropColor(unpack(colors.sidebarActive))
                 tab.accent:Show()
             else
-                tab:SetBackdropColor(0, 0, 0, 0)
-                tab.accent:Hide()
+                tab:SetBackdropColor(0, 0, 0, 0) -- #00000000
+                if tab.accent then tab.accent:Hide() end
             end
         end
         for i, panel in ipairs(panels) do

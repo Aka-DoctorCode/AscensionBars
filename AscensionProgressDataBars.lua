@@ -12,7 +12,7 @@
 -------------------------------------------------------------------------------
 
 local addonName, addonTable = ...
-local Locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
+local locales = _G.LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
 
 ---@class AscensionBars
 ---@field db { profile: table, global: table, RegisterCallback: function, SetProfile: function, GetProfiles: function, GetCurrentProfile: function, CopyProfile: function, DeleteProfile: function, ResetProfile: function }
@@ -132,9 +132,9 @@ function ascensionBars:getClassColor()
     if not self.state then return { r = 1, g = 1, b = 1, a = 1 } end -- #FFFFFF
 
     if not self.state.cachedClassColor then
-        local _, classFilename = UnitClass("player")
-        if classFilename then
-            local classColor = C_ClassColor.GetClassColor(classFilename)
+        local _, classFilename = _G.UnitClass("player")
+        if classFilename and _G.C_ClassColor and _G.C_ClassColor.GetClassColor then
+            local classColor = _G.C_ClassColor.GetClassColor(classFilename)
             if classColor then
                 self.state.cachedClassColor = classColor
                 return self.state.cachedClassColor
@@ -168,25 +168,29 @@ end
 -------------------------------------------------------------------------------
 
 function ascensionBars:createFrames()
-    self.textHolder = CreateFrame("Frame", "AscensionBars_TextHolderT1", UIParent)
-    self.textHolder:SetFrameStrata("HIGH")
-    self.textHolder:SetClipsChildren(false)
-    self.textHolder:SetHeight(20)
-    self.textHolder:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    self.textHolder = _G.CreateFrame("Frame", "AscensionBars_TextHolderT1", _G.UIParent)
+    if self.textHolder then
+        self.textHolder:SetFrameStrata("HIGH")
+        self.textHolder:SetClipsChildren(false)
+        self.textHolder:SetHeight(20)
+        self.textHolder:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
+    end
 
     if not self.hoverFrame then
-        self.hoverFrame = CreateFrame("Frame", "AscensionBars_HoverFrame", UIParent)
-        self.hoverFrame:SetAllPoints(UIParent)
-        self.hoverFrame:SetFrameStrata("BACKGROUND")
-        self.hoverFrame:EnableMouse(false)
+        self.hoverFrame = _G.CreateFrame("Frame", "AscensionBars_HoverFrame", _G.UIParent)
+        if self.hoverFrame then
+            self.hoverFrame:SetAllPoints(_G.UIParent)
+            self.hoverFrame:SetFrameStrata("BACKGROUND")
+            self.hoverFrame:EnableMouse(false)
+        end
     end
 
-    if not self.paragonText then
-        self.paragonText = UIParent:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    if not self.paragonText and _G.UIParent then
+        self.paragonText = _G.UIParent:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     end
 
-    if not self.houseRewardText then
-        self.houseRewardText = UIParent:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    if not self.houseRewardText and _G.UIParent then
+        self.houseRewardText = _G.UIParent:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     end
 
 
@@ -350,8 +354,8 @@ function ascensionBars:updateSpark(bar, minVal, maxVal, currentVal)
 
     if not hasGlow or not hasCore then return end
 
-    local barWidth  = bar.bar:GetWidth()
-    local barHeight = bar.bar:GetHeight()
+    local barWidth  = bar.bar:GetWidth() or 0
+    local barHeight = bar.bar:GetHeight() or 0
     local percentage = (maxVal > minVal) and (currentVal - minVal) / (maxVal - minVal) or 0
     local xPos = barWidth * percentage
 
@@ -792,10 +796,12 @@ function ascensionBars:OnInitialize()
     }
 
     local defaultFont = [[Fonts\FRIZQT__.TTF]]
+    self.fontToUse = defaultFont
     if _G.GameFontNormal and _G.GameFontNormal.GetFont then
-        self.fontToUse = _G.GameFontNormal:GetFont() or defaultFont
-    else
-        self.fontToUse = defaultFont
+        local fontPath = _G.GameFontNormal:GetFont()
+        if fontPath then
+            self.fontToUse = fontPath
+        end
     end
 
     local function toggleConfig()

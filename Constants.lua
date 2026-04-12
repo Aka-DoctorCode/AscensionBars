@@ -132,7 +132,7 @@ ascensionBars.defaults = {
             ["Rep"] = {
                 enabled = true,
                 block = "TOP",
-                order = 1,
+                order = 2,
                 freeX = 0, freeY = -20, freeWidth = 500, freeHeight = 6,
                 useCustomFont = false, customFontPath = nil,
                 useCustomTextSize = false, customTextSize = 14,
@@ -142,7 +142,7 @@ ascensionBars.defaults = {
             ["Honor"] = {
                 enabled = false,
                 block = "BOTTOM",
-                order = 2,
+                order = 1,
                 freeX = 0, freeY = -40, freeWidth = 500, freeHeight = 6,
                 useCustomFont = false, customFontPath = nil,
                 useCustomTextSize = false, customTextSize = 14,

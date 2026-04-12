@@ -19,8 +19,6 @@ local Locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
 
 -------------------------------------------------------------------------------
 -- PARAGON MANAGER
--- Responsible for scanning and caching paragon reward availability.
--- Fires RaidNotice_AddMessage alerts for pending rewards (no chat prints).
 -------------------------------------------------------------------------------
 
 --- Scans all factions for pending paragon rewards and updates the account-wide cache.
