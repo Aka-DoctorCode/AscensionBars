@@ -19,11 +19,10 @@ local locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
 local colors = ascensionBars.colors
 local files = ascensionBars.files
 local menuStyle = ascensionBars.menuStyle
-local layoutFactory = addonTable.layoutFactory
-
 -- Configuration frame setup
 function createConfigFrame()
-    if not layoutFactory then return end
+    local UIContext = addonTable.UIContext
+    if not UIContext then return end
     if ascensionBars.configFrame then return end
 
     ---@cast ascensionBars AscensionBars
@@ -168,7 +167,7 @@ function createConfigFrame()
         function(panel) if addonTable.profilesTab then addonTable.profilesTab:build(panel) end end
     }
 
-    ascensionBars.configTabs = layoutFactory:createTabbedInterface(configFrame, tabNames, buildFuncs, 1)
+    ascensionBars.configTabs = UIContext:createTabbedInterface(configFrame, tabNames, buildFuncs, 1)
     configFrame:Hide()
 end
 

@@ -33,7 +33,6 @@ Bars\Carousel.lua
 
 # Config Panel
 ConfigPanel/ConfigUtils.lua
-ConfigPanel/UIFactory.lua
 ConfigPanel/BarsLayout.lua
 ConfigPanel/CustomGrid.lua
 ConfigPanel/TextLayout.lua

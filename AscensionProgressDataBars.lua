@@ -810,6 +810,32 @@ function ascensionBars:OnInitialize()
     self:RegisterChatCommand("apb", toggleConfig)
 
     self:createFrames()
+
+    local AscensionUI = LibStub("AscensionSuit-UI", true)
+    if not AscensionUI then
+        error("AscensionProgressDataBars requires AscensionSuit-UI library from AscensionSuit addon.")
+        return
+    end
+
+    local addonStyles = {
+        colors = self.colors,
+        files = self.files,
+        dimensions = self.menuStyle,
+        fonts = {
+            header = self.menuStyle.headerFont,
+            label = self.menuStyle.labelFont,
+            desc = self.menuStyle.descFont
+        },
+        textures = {
+            bar = self.constants.TEXTURE_BAR,
+            spark = self.constants.TEXTURE_SPARK
+        }
+    }
+
+    local UIContext = AscensionUI:CreateContext(addonStyles)
+    addonTable.UIContext = UIContext
+    addonTable.layoutModel = UIContext.layoutModel
+    addonTable.layoutFactory = UIContext
 end
 
 function ascensionBars:OnEnable()
