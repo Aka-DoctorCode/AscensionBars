@@ -3,7 +3,6 @@ license-output: LICENSE
 enable-nolib-creation: no
 required-dependencies:
     - AscensionSuit
-    - ascensionsuit
 ignore:
     - __MACOSX
     - pkgmeta.yaml
