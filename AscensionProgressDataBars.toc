@@ -9,6 +9,7 @@
 ## IconTexture: Interface\AddOns\AscensionProgressDataBars\Media\AkaDoctorCode.png
 ## X-Curse-Project-ID: 1401337
 ## X-Wago-ID: RNLk9EGo
+## X-Wago-Dependencies: qKQmnnKx
 
 # Locales
 Locales\enUS.lua
