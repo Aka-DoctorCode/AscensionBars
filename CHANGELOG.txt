@@ -1,7 +1,6 @@
   <h1>@project-version@</h1>
 <ul>
-    <li>Implementation of my UI factory library</li>
-    <li>Fix: Russian Locale Implementation</li>
+    <li>Packager updated to Node 24</li>
 </ul>
 <br>
 <h3>Positive feedback is always appreciated, it helps me to continue working on this project</h3>
