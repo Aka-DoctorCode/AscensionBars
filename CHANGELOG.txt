@@ -1,6 +1,8 @@
   <h1>@project-version@</h1>
 <ul>
-    <li>.toc update</li>
+    <li>Tooltip for each option is been implemented</li>
+    <li>Right click to reset options implemented</li>
+
 </ul>
 <br>
 <h3>Positive feedback is always appreciated, it helps me to continue working on this project</h3>

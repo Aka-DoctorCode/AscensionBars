@@ -310,3 +310,7 @@ Locales["IMPORT_EXPORT_DESC"] = "Поделитесь своей конфигу�
 Locales["CLOSE"] = "Закрыть"
 Locales["IMPORT"] = "Импорт"
 Locales["RESET_CONFIRM"] = "Вы уверены, что хотите сбросить профиль '%s' к настройкам по умолчанию?"
+Locales["GRID_CELL_INFO"] = "Информация о сетке"
+Locales["LEFT_CLICK"] = "Левый клик"
+Locales["RIGHT_CLICK"] = "Правый клик"
+Locales["CLEAR_ASSIGNMENT"] = "Очистить назначение"

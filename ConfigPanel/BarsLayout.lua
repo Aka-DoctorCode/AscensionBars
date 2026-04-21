@@ -146,7 +146,7 @@ function barsLayoutTab:createBarControls(layout, profile, barKey, displayName, p
         end
         local endLeft = layout.y
 
-        layout.y = row1Y
+        layout.y = row1Y + 4
         layout:checkbox("UseCustomHeightCheckbox_" .. barKey, locales["USE_CUSTOM_HEIGHT"], nil,
             function() return bar.useCustomHeight end,
             function(v)
