@@ -2,7 +2,6 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: Colors.lua
--- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -74,7 +73,7 @@ function colorsTab:build(panel)
         end, inner1X - 6)
         
     if not profile.useClassColorXP then
-        col1Layout:colorPicker("CustomXPColorPicker", locales["CUSTOM_XP_COLOR"],
+        col1Layout:colorPicker("CustomXPColorPicker", locales["CUSTOM_XP_COLOR"], nil,
             function()
                 local c = profile.xpBarColor
                 return c.r, c.g, c.b, c.a
@@ -96,7 +95,7 @@ function colorsTab:build(panel)
         end, inner1X - 6)
         
     if profile.showRestedBar then
-        col1Layout:colorPicker("RestedColorPicker", locales["RESTED_COLOR"],
+        col1Layout:colorPicker("RestedColorPicker", locales["RESTED_COLOR"], nil,
             function()
                 local c = profile.restedBarColor
                 return c.r, c.g, c.b, c.a
@@ -117,7 +116,7 @@ function colorsTab:build(panel)
     col1Layout:label("HouseFavorHeader", locales["HOUSE_FAVOR"], inner1X, colors.gold)
     col1Layout.y = col1Layout.y - 8
     
-    col1Layout:colorPicker("HouseXPColorPicker", locales["HOUSE_XP_COLOR"],
+    col1Layout:colorPicker("HouseXPColorPicker", locales["HOUSE_XP_COLOR"], nil,
         function()
             local c = profile.houseXpColor
             if not c then return 0.9, 0.5, 0, 1 end -- #E68000
@@ -139,7 +138,7 @@ function colorsTab:build(panel)
     col1Layout:label("HonorHeader", locales["HONOR"], inner1X, colors.gold)
     col1Layout.y = col1Layout.y - 8
     
-    col1Layout:colorPicker("HonorColorPicker", locales["HONOR_COLOR"],
+    col1Layout:colorPicker("HonorColorPicker", locales["HONOR_COLOR"], nil,
         function()
             local c = profile.honorColor
             if not c then return 0.8, 0.2, 0.2, 1 end -- #CC3333
@@ -161,7 +160,7 @@ function colorsTab:build(panel)
     col1Layout:label("AzeriteHeader", locales["AZERITE"], inner1X, colors.gold)
     col1Layout.y = col1Layout.y - 8
     
-    col1Layout:colorPicker("AzeriteColorPicker", locales["AZERITE_COLOR"],
+    col1Layout:colorPicker("AzeriteColorPicker", locales["AZERITE_COLOR"], nil,
         function()
             local c = profile.azeriteColor
             if not c then return 0.9, 0.8, 0.5, 1 end -- #E6CC80
@@ -195,7 +194,7 @@ function colorsTab:build(panel)
         end, inner2X - 6)
         
     if not profile.useReactionColorRep then
-        col2Layout:colorPicker("CustomRepColorPicker", locales["CUSTOM_REP_COLOR"],
+        col2Layout:colorPicker("CustomRepColorPicker", locales["CUSTOM_REP_COLOR"], nil,
             function()
                 local c = profile.repBarColor
                 return c.r, c.g, c.b, c.a
@@ -216,7 +215,7 @@ function colorsTab:build(panel)
         for i = 1, 11 do
             col2Layout:colorPicker(
                 "RepStandingColorPicker_" .. i,
-                standingLabels[i] or string.format(locales["RANK_NUM"], i),
+                standingLabels[i] or string.format(locales["RANK_NUM"], i), nil,
                 function()
                     local c = profile.repColors[i] or {r = 1, g = 1, b = 1, a = 1} -- #FFFFFF
                     return c.r, c.g, c.b, c.a

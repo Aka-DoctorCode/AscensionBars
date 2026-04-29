@@ -2,7 +2,6 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: ParagonAlerts.lua
--- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -95,7 +94,7 @@ function paragonAlertsTab:build(panel)
         end, sliderWidth, slider1X)
 
         
-    col1Layout:colorPicker("AlertColorPicker", locales["ALERT_COLOR"],
+    col1Layout:colorPicker("AlertColorPicker", locales["ALERT_COLOR"], nil,
         function()
             local c = profile.paragonPendingColor
             if not c then return 0, 0.8, 1, 1 end -- #00CCFF
@@ -143,7 +142,7 @@ function paragonAlertsTab:build(panel)
             ascensionBars:updateDisplay()
         end, sliderWidth, slider2X)
 
-    col2Layout:colorPicker("HouseRewardColorPicker", locales["ALERT_COLOR"],
+    col2Layout:colorPicker("HouseRewardColorPicker", locales["ALERT_COLOR"], nil,
         function()
             local c = profile.houseRewardTextColor
             if not c then return 0.9, 0.5, 0, 1 end -- #E68000

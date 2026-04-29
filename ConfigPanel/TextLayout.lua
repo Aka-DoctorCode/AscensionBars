@@ -2,7 +2,6 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: TextLayout.lua
--- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -84,7 +83,7 @@ function textLayoutTab:build(panel)
             profile.textYOffset = v; ascensionBars:updateDisplay()
         end, colWidth - 20, col2X)
 
-    mainLayout:colorPicker("GlobalTextColorPicker", L("GLOBAL_TEXT_COLOR", "Global Text Color"),
+    mainLayout:colorPicker("GlobalTextColorPicker", L("GLOBAL_TEXT_COLOR", "Global Text Color"), nil,
         function()
             local c = profile.textColor
             if not c then return 1, 1, 1, 1 end

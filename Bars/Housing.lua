@@ -2,7 +2,6 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: Bars/Housing.lua
--- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025-2026 Aka-DoctorCode. All Rights Reserved.
 --
