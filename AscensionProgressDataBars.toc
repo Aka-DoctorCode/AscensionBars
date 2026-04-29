@@ -1,6 +1,6 @@
 ## Interface: 120005
 ## Title: Ascension Progress Data Bar
-## Notes: Minimalist information bars with advanced customization.
+## Notes: Minimalistic replacement  bars for reputation, experience, honor, housing favor and other. Create custom bars for other reputations tracking. Paragon and house upgrades reward availability reminder
 ## Author: AkaDoctorCode
 ## Category: Interface
 ## Version: @project-version@
@@ -9,7 +9,6 @@
 ## IconTexture: Interface\AddOns\AscensionProgressDataBars\Media\AkaDoctorCode.png
 ## X-Curse-Project-ID: 1401337
 ## X-Wago-ID: RNLk9EGo
-## X-Wago-Dependencies: qKQmnnKx
 
 # Locales
 Locales\enUS.lua
