@@ -2,7 +2,7 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: BarsLayout.lua
--- Version: @project-version@
+-- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -146,7 +146,7 @@ function barsLayoutTab:createBarControls(layout, profile, barKey, displayName, p
         end
         local endLeft = layout.y
 
-        layout.y = row1Y + 4
+        layout.y = row1Y
         layout:checkbox("UseCustomHeightCheckbox_" .. barKey, locales["USE_CUSTOM_HEIGHT"], nil,
             function() return bar.useCustomHeight end,
             function(v)

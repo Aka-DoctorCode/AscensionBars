@@ -2,7 +2,7 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: AscensionProgressDataBars.lua
--- Version: @project-version@
+-- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025-2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -660,7 +660,7 @@ function ascensionBars:updateLayout(shouldHideXP)
 
     local function renderBlock(blockData, blockName, startAnchor, anchorFrame, direction)
         local gridOpts = profile.customGrids and profile.customGrids[blockName]
-        if profile.customGridMasterEnabled and gridOpts and gridOpts.enabled then
+        if gridOpts and gridOpts.enabled then
             layoutGridBlock(blockData, blockName, startAnchor, anchorFrame, direction)
         else
             layoutBlock(blockData, blockName, startAnchor, anchorFrame, direction)
@@ -730,6 +730,9 @@ function ascensionBars:updateVisibility()
             end
 
             barObj.bar:SetAlpha(barAlpha)
+            if barAlpha > 0 and not barObj.bar:IsShown() then
+                barObj.bar:Show()
+            end
 
             if barObj.leftText   then barObj.leftText:SetAlpha(0)             end
             if barObj.rightText  then barObj.rightText:SetAlpha(0)            end

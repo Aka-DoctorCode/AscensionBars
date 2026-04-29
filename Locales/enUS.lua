@@ -2,7 +2,7 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: enUS.lua
--- Version: @project-version@
+-- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -312,7 +312,3 @@ Locales["IMPORT_EXPORT_DESC"] = "Share your configuration with others."
 Locales["CLOSE"] = "Close"
 Locales["IMPORT"] = "Import"
 Locales["RESET_CONFIRM"] = "Are you sure you want to reset the profile '%s' to defaults?"
-Locales["GRID_CELL_INFO"] = "Grid Assignment"
-Locales["LEFT_CLICK"] = "Left Click"
-Locales["RIGHT_CLICK"] = "Right Click"
-Locales["CLEAR_ASSIGNMENT"] = "Clear Assignment"

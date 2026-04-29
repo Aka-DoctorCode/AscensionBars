@@ -2,7 +2,7 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: deDE.lua
--- Version: @project-version@
+-- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -310,7 +310,3 @@ Locales["IMPORT_EXPORT_DESC"] = "Teilen Sie Ihre Konfiguration mit anderen."
 Locales["CLOSE"] = "Schließen"
 Locales["IMPORT"] = "Importieren"
 Locales["RESET_CONFIRM"] = "Sind Sie sicher, dass Sie das Profil '%s' auf die Standardwerte zurücksetzen möchten?"
-Locales["GRID_CELL_INFO"] = "Gitter-Zuordnung"
-Locales["LEFT_CLICK"] = "Linksklick"
-Locales["RIGHT_CLICK"] = "Rechtsklick"
-Locales["CLEAR_ASSIGNMENT"] = "Zuordnung aufheben"

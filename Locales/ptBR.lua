@@ -2,7 +2,7 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: ptBR.lua
--- Version: @project-version@
+-- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -310,7 +310,3 @@ Locales["IMPORT_EXPORT_DESC"] = "Compartilhe sua configuração com outras pesso
 Locales["CLOSE"] = "Fechar"
 Locales["IMPORT"] = "Importar"
 Locales["RESET_CONFIRM"] = "Tem certeza de que deseja restaurar o perfil '%s' aos valores padrão?"
-Locales["GRID_CELL_INFO"] = "Informação de Atribuição"
-Locales["LEFT_CLICK"] = "Clique Esquerdo"
-Locales["RIGHT_CLICK"] = "Clique Direito"
-Locales["CLEAR_ASSIGNMENT"] = "Limpar Atribuição"

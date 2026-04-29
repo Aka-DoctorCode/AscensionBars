@@ -2,7 +2,7 @@
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
 -- File: CustomGrid.lua
--- Version: @project-version@
+-- Version: V46
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
 --
@@ -51,21 +51,15 @@ function customGridTab:createVisualCell(parentFrame, cellKey, cellWidth, cellHei
         innerBg:SetPoint("BOTTOMRIGHT", cellButton, "BOTTOMRIGHT", -1, 1)
         cellButton.innerBg = innerBg
 
-        local label = cellButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+        local label = cellButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         label:SetWordWrap(false)
         cellButton.label = label
 
         cellButton:SetScript("OnEnter", function(self)
             self.border:SetColorTexture(_G.unpack(colors.surfaceHighlight))
-            _G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            _G.GameTooltip:SetText(locales["GRID_CELL_INFO"] or "Grid Assignment", 1, 1, 1)
-            _G.GameTooltip:AddLine("|cFF00FF00" .. (locales["LEFT_CLICK"] or "Left Click") .. ":|r " .. (locales["ASSIGN_BAR"] or "Assign Bar"), 1, 1, 1)
-            _G.GameTooltip:AddLine("|cFFFF0000" .. (locales["RIGHT_CLICK"] or "Right Click") .. ":|r " .. (locales["CLEAR_ASSIGNMENT"] or "Clear Assignment"), 1, 1, 1)
-            _G.GameTooltip:Show()
         end)
         cellButton:SetScript("OnLeave", function(self)
             self.border:SetColorTexture(_G.unpack(colors.blackDetail))
-            _G.GameTooltip_Hide()
         end)
     end
 
@@ -93,41 +87,22 @@ function customGridTab:createVisualCell(parentFrame, cellKey, cellWidth, cellHei
         cellButton.label:SetTextColor(_G.unpack(colors.textLight))
     end
 
-        cellButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-        cellButton:SetScript("OnClick", function(self, button)
-            if button == "RightButton" then
-                if onSelectCallback then onSelectCallback("none") end
-                return
-            end
-
-            if _G.MenuUtil and _G.MenuUtil.CreateContextMenu then
-                _G.MenuUtil.CreateContextMenu(self, function(owner, rootDesc)
-                    local title = rootDesc:CreateTitle(locales["ASSIGN_BAR"] or "Assign Bar")
-                    title:AddInitializer(function(btn)
-                        local text = btn.fontString or btn:GetFontString()
-                        if text then text:SetFontObject("GameFontNormalHuge") end
-                    end)
-                    
-                    local noneBtn = rootDesc:CreateButton(locales["NONE"] or "None", function()
-                        if onSelectCallback then onSelectCallback("none") end
-                    end)
-                    noneBtn:AddInitializer(function(btn)
-                        local text = btn.fontString or btn:GetFontString()
-                        if text then text:SetFontObject("GameFontHighlightLarge") end
-                    end)
-
-                    for _, opt in _G.ipairs(barOptions) do
-                        local mBtn = rootDesc:CreateButton(opt.label, function()
-                            if onSelectCallback then onSelectCallback(opt.value) end
-                        end)
-                        mBtn:AddInitializer(function(btn)
-                            local text = btn.fontString or btn:GetFontString()
-                            if text then text:SetFontObject("GameFontHighlightLarge") end
-                        end)
-                    end
+    -- Re-bind the click behavior with updated callback
+    cellButton:SetScript("OnClick", function(self)
+        if _G.MenuUtil and _G.MenuUtil.CreateContextMenu then
+            _G.MenuUtil.CreateContextMenu(self, function(owner, rootDesc)
+                rootDesc:CreateTitle(locales["ASSIGN_BAR"] or "Assign Bar")
+                rootDesc:CreateButton(locales["NONE"] or "None", function()
+                    if onSelectCallback then onSelectCallback("none") end
                 end)
-            end
-        end)
+                for _, opt in _G.ipairs(barOptions) do
+                    rootDesc:CreateButton(opt.label, function()
+                        if onSelectCallback then onSelectCallback(opt.value) end
+                    end)
+                end
+            end)
+        end
+    end)
 
     cellButton.currentAssignment = currentAssignment
     return cellButton
@@ -170,7 +145,7 @@ local function buildPresetControls(panel, blockKey, grid, blockX, blockWidth, la
         function(v)
             grid.preset = v
             applyPresetToGrid(grid, v)
-            ascensionBars:updateDisplay(true)
+            ascensionBars:updateDisplay()
             if panel.updateLayout then panel:updateLayout() end
         end, blockWidth / 2 - 10, blockX + menuStyle.contentPadding / 2)
 
@@ -190,10 +165,7 @@ local function buildPresetControls(panel, blockKey, grid, blockX, blockWidth, la
                     grid.colsPerRow[r] = grid.colsPerRow[r] or 1
                     grid.assignments[r] = grid.assignments[r] or { "none" }
                 end
-                -- Truncate old assignments and cols counts
-                for r = v + 1, #grid.assignments do grid.assignments[r] = nil end
-                for r = v + 1, #grid.colsPerRow do grid.colsPerRow[r] = nil end
-                ascensionBars:updateDisplay(true)
+                ascensionBars:updateDisplay()
                 if panel.updateLayout then panel:updateLayout() end
             end, blockWidth / 2 - 10, rightColX)
 
@@ -229,9 +201,7 @@ local function buildCellGrid(panel, blockKey, grid, blockX, blockWidth, barKeys,
                 grid.colsPerRow[r] = v
                 grid.assignments[r] = grid.assignments[r] or {}
                 for c = 1, v do grid.assignments[r][c] = grid.assignments[r][c] or "none" end
-                -- Truncate old columns in this row
-                for c = v + 1, #grid.assignments[r] do grid.assignments[r][c] = nil end
-                ascensionBars:updateDisplay(true)
+                ascensionBars:updateDisplay()
                 if panel and panel.updateLayout then panel:updateLayout() end
             end, stepperWidth, blockX)
 
@@ -264,7 +234,7 @@ local function buildCellGrid(panel, blockKey, grid, blockX, blockWidth, barKeys,
                         end
                     end
                     grid.assignments[r][c] = selectedValue
-                    ascensionBars:updateDisplay(true)
+                    ascensionBars:updateDisplay()
                     if panel and panel.updateLayout then panel:updateLayout() end
                 end)
         end
@@ -299,7 +269,7 @@ local function buildBarToggles(panel, blockKey, barKeys, barNames, blockX, block
                 function() return ascensionBars.db.profile.bars[bKey].enabled end,
                 function(v)
                     ascensionBars.db.profile.bars[bKey].enabled = v
-                    ascensionBars:updateDisplay(true)
+                    ascensionBars:updateDisplay()
                 end, tX)
 
             if layoutCol.y < maxTglDescentY then
@@ -349,14 +319,14 @@ local function buildGridBlock(panel, blockKey, blockName, startY, availableWidth
         locales["CUSTOM_GRID_DESC"] or "",
         function() return grid.enabled end,
         function(v)
-                grid.enabled = v
-                if v and grid.preset == "CUSTOM" and grid.numRows == 1 then
-                    grid.preset = "2X2"
-                    applyPresetToGrid(grid, "2X2")
-                end
-                ascensionBars:updateDisplay(true)
-                if panel and panel.updateLayout then panel:updateLayout() end
-            end, menuStyle.contentPadding)
+            grid.enabled = v
+            if v and grid.preset == "CUSTOM" and grid.numRows == 1 then
+                grid.preset = "2X2"
+                applyPresetToGrid(grid, "2X2")
+            end
+            ascensionBars:updateDisplay()
+            if panel and panel.updateLayout then panel:updateLayout() end
+        end, menuStyle.contentPadding)
 
     layoutCol.y = layoutCol.y - menuStyle.labelSpacing
 
@@ -498,8 +468,8 @@ local function buildReputationSection(panel, startY, availableWidth)
                     name = nameStr
                 }
                 ascensionBars:createDynamicBar(key)
-                ascensionBars:updateDisplay(true)
-                if panel.updateLayout then panel.updateLayout() end
+                ascensionBars:updateDisplay()
+                if panel.updateLayout then panel:updateLayout() end
             end
         end
     end)
@@ -554,7 +524,7 @@ function customGridTab:build(panel)
 
     masterToggle:SetScript("OnClick", function(self)
         profile.customGridMasterEnabled = self:GetChecked()
-        ascensionBars:updateDisplay(true)
+        ascensionBars:updateDisplay()
         if panel.updateLayout then panel:updateLayout() end
     end)
 
