@@ -3,20 +3,15 @@
 -- Author: Aka-DoctorCode
 -- File: Profiles.lua
 -------------------------------------------------------------------------------
--- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
---
--- This software and its source code are the exclusive property of the author.
--- No part of this file may be copied, modified, redistributed, or used in
--- derivative works without express written permission.
-------------------------------------------------------------------------------
+---@diagnostic disable: undefined-global, undefined-field, inject-field
 
 local addonName, addonTable = ...
----@type AscensionBars
+
 local ascensionBars = addonTable.main or LibStub("AceAddon-3.0"):GetAddon(addonName)
----@cast ascensionBars AscensionBars
+
 local L = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
-local colors = ascensionBars.colors
-local menuStyle = ascensionBars.menuStyle
+local colors = setmetatable({}, { __index = function(t, k) return ascensionBars.colors and ascensionBars.colors[k] end })
+local menuStyle = setmetatable({}, { __index = function(t, k) return ascensionBars.menuStyle and ascensionBars.menuStyle[k] end })
 
 addonTable.profilesTab = {}
 local profilesTab = addonTable.profilesTab
@@ -283,7 +278,7 @@ function profilesTab:build(panel)
     local content = panel.content
     local db = ascensionBars.db
     local currentProfile = db:GetCurrentProfile()
-    local layout = addonTable.layoutModel:new(content, 0)
+    local layout = addonTable.layoutModel:new(nil, content, 0)
     local currentY = -15
 
     local profileIndicator = content:CreateFontString(nil, "OVERLAY", menuStyle.headerFont)

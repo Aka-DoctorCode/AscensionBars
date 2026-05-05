@@ -1,166 +1,15 @@
 -------------------------------------------------------------------------------
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
--- File: AscensionProgressDataBars.lua
+-- File: BarManager.lua
 -------------------------------------------------------------------------------
--- Copyright (c) 2025-2026 Aka-DoctorCode. All Rights Reserved.
---
--- This software and its source code are the exclusive property of the author.
--- No part of this file may be copied, modified, redistributed, or used in
--- derivative works without express written permission.
--------------------------------------------------------------------------------
+---@diagnostic disable: undefined-global, undefined-field, inject-field
 
 local addonName, addonTable = ...
-local locales = _G.LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
-
----@class AscensionBars
----@field db { profile: table, global: table, RegisterCallback: function, SetProfile: function, GetProfiles: function, GetCurrentProfile: function, CopyProfile: function, DeleteProfile: function, ResetProfile: function }
----@field paragonText FontString
----@field renderParagonText function
----@field scanParagonRewards function
----@field notifyParagonRewardsAvailable function
----@field activeBars table<string, table>
----@field xp table
----@field rep table
----@field honor table
----@field houseXp table
----@field azerite table
----@field state table
----@field constants table
----@field defaults table
----@field configFrame Frame | any
----@field isMinimized boolean
----@field normalWidth number
----@field normalHeight number
----@field activeTab number
----@field tabs table
----@field panels table
----@field textHolder Frame
----@field textHolders table
----@field fontToUse string
----@field colors table
----@field files table
----@field menuStyle table
----@field houseRewardText FontString
----@field hoverFrame Frame
----@field registeredElements table
----@field configTabs table
----@field refreshConfig function
----@field refreshConfigUI function
----@field updateDisplay function
----@field updateVisibility function
----@field setupBar function
----@field getClassColor function
----@field refreshHousingFavor function
----@field setupTextHolders function
----@field acquireTexture function
----@field updateStandardBar function
----@field cleanupTextures function
----@field hideBlizzardFrames function
----@field createBars function
----@field createDynamicBar function
----@field removeDynamicBar function
----@field searchFactionText string
----@field selectedFactionToAdd number
----@field updateLayout function
----@field IsEnabled function
----@field RegisterChatCommand function
----@field RegisterEvent function
----@field UnregisterEvent function
----@field UnregisterAllEvents function
----@field NewModule function
----@field IterateModules function
----@field GetModule function
----@field configExperience function
----@field configReputation function
----@field configHonor function
----@field configHouseXp function
----@field configAzerite function
----@field renderExperience function
----@field renderReputation function
----@field renderHonor function
----@field renderHouseXp function
----@field renderAzerite function
----@field getFactionData function
----@field onHouseFavorUpdated function
----@field formatXP function
----@field getPlayerMaxLevel function
----@field applyTextStyles function
----@field handleOnUpdate function
----@field toggleConfig function
----@field onPlayerEnteringWorld function
----@field onCombatStart function
----@field onCombatEnd function
----@field onQuestTurnIn function
----@field onCVarUpdate function
----@field createFrames function
----@field createBar function
----@field updateSpark function
----@field pushCarouselEvent function
----@field updateLegend function
----@field updateCarouselVisibility function
----@field startCarousel function
-
----@class DataTextResult
----@field identity string
----@field details string
----@field percentage string
----@field remaining string
-
-local ascensionBars = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceEvent-3.0", "AceConsole-3.0")
----@cast ascensionBars AscensionBars
-
-addonTable.main = ascensionBars
+local ascensionBars = addonTable.main or _G.LibStub("AceAddon-3.0"):GetAddon(addonName)
 
 local texturePool = {}
 local lastUpdate  = 0
-
--------------------------------------------------------------------------------
--- UTILITIES
--------------------------------------------------------------------------------
-
-function ascensionBars:getPlayerMaxLevel()
-    if _G.GetMaxLevelForLatestExpansion then
-        local maxLevel = _G.GetMaxLevelForLatestExpansion()
-        if maxLevel then return maxLevel end
-    end
-    return 80
-end
-
-function ascensionBars:getClassColor()
-    if not self.state then return { r = 1, g = 1, b = 1, a = 1 } end -- #FFFFFF
-
-    if not self.state.cachedClassColor then
-        local _, classFilename = _G.UnitClass("player")
-        if classFilename and _G.C_ClassColor and _G.C_ClassColor.GetClassColor then
-            local classColor = _G.C_ClassColor.GetClassColor(classFilename)
-            if classColor then
-                self.state.cachedClassColor = classColor
-                return self.state.cachedClassColor
-            end
-        end
-        self.state.cachedClassColor = { r = 1, g = 1, b = 1, a = 1 } -- #FFFFFF
-    end
-    return self.state.cachedClassColor
-end
-
-function ascensionBars:hideBlizzardFrames()
-    local framesToHide = { _G["StatusTrackingBarManager"], _G["UIWidgetPowerBarContainerFrame"] }
-    for _, frame in pairs(framesToHide) do
-        if frame then
-            frame:UnregisterAllEvents()
-            frame:Hide()
-            frame:SetAlpha(0)
-            frame.Show = function() end
-        end
-    end
-end
-
-function ascensionBars:formatXP()
-    local dt = addonTable.dataText
-    if dt then return dt:combine(dt:formatExperience()) end
-    return ""
-end
 
 -------------------------------------------------------------------------------
 -- FRAME CREATION
@@ -191,7 +40,6 @@ function ascensionBars:createFrames()
     if not self.houseRewardText and _G.UIParent then
         self.houseRewardText = _G.UIParent:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     end
-
 
     local barDefs = {
         { key = "XP",      name = "AscensionXPBar_XP"      },
@@ -224,8 +72,6 @@ function ascensionBars:createFrames()
     if self.honor   then self.honor.bar:Hide()   end
     if self.houseXp then self.houseXp.bar:Hide() end
     if self.azerite then self.azerite.bar:Hide() end
-
-
 end
 
 function ascensionBars:createDynamicBar(barKey)
@@ -245,7 +91,7 @@ function ascensionBars:removeDynamicBar(barKey)
 end
 
 function ascensionBars:createBar(name)
-    local bar = CreateFrame("StatusBar", name, UIParent)
+    local bar = _G.CreateFrame("StatusBar", name, _G.UIParent)
     bar:SetFrameStrata("MEDIUM")
     bar:EnableMouse(true)
 
@@ -295,7 +141,7 @@ function ascensionBars:createBar(name)
 
     local restedOverlay = (name == "AscensionXPBar_XP") and bar:CreateTexture(nil, "ARTWORK") or nil
 
-    local txFrame = CreateFrame("Frame", nil, UIParent)
+    local txFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
     txFrame:SetFrameStrata("HIGH")
     txFrame:SetFrameLevel(bar:GetFrameLevel() + 5)
     txFrame:SetAllPoints(bar)
@@ -461,11 +307,11 @@ function ascensionBars:applyTextStyles()
 end
 
 function ascensionBars:updateDisplay(force)
-    local now = GetTime()
+    local now = _G.GetTime()
     if not force and (now - lastUpdate < ascensionBars.constants.UPDATE_THROTTLE) then
         if self.state and not self.state.updatePending then
             self.state.updatePending = true
-            C_Timer.After(ascensionBars.constants.UPDATE_THROTTLE, function()
+            _G.C_Timer.After(ascensionBars.constants.UPDATE_THROTTLE, function()
                 if self.state then self.state.updatePending = false end
                 self:updateDisplay(true)
             end)
@@ -482,7 +328,7 @@ function ascensionBars:updateDisplay(force)
     self:applyTextStyles()
 
     local maxLevel   = self:getPlayerMaxLevel() or 1
-    local curLevel   = UnitLevel("player") or 0
+    local curLevel   = _G.UnitLevel("player") or 0
     local isConfig   = self.state and self.state.isConfigMode
     local shouldHideXP = (curLevel >= maxLevel) and profile.hideAtMaxLevel and not isConfig
 
@@ -539,7 +385,7 @@ function ascensionBars:updateLayout(shouldHideXP)
 
     ---------------------------------------------------------------------------
     local barAnchor = profile.barAnchor or "TOP"
-    local screenW   = UIParent:GetWidth() or 1024
+    local screenW   = _G.UIParent:GetWidth() or 1024
 
     local function layoutBlock(block, blockName, startAnchor, anchorFrame, direction)
         local prevBar = nil
@@ -548,9 +394,6 @@ function ascensionBars:updateLayout(shouldHideXP)
         if blockName == "TOP" then
             initialYOffset = profile.usePerBlockOffsets and (profile.topOffset or 0) or (profile.yOffset or -2)
         else
-            -- Bottom offset from the slider is positive (0 to +500).
-            -- Global yOffset from the slider is negative (0 to -500).
-            -- We always need a positive value here to push UP from the bottom edge of UIParent.
             initialYOffset = profile.usePerBlockOffsets and (profile.bottomOffset or 0) or math.abs(profile.yOffset or -2)
         end
         
@@ -628,7 +471,7 @@ function ascensionBars:updateLayout(shouldHideXP)
                             else
                                 if prevRowBar then
                                     obj.bar:SetPoint(startAnchor, prevRowBar, direction, 0, gapDirection)
-                                else
+                            else
                                     obj.bar:SetPoint(startAnchor, anchorFrame, startAnchor, 0, initialYOffset)
                                 end
                             end
@@ -667,11 +510,11 @@ function ascensionBars:updateLayout(shouldHideXP)
     end
 
     if barAnchor == "TOP" then
-        renderBlock(blocks.TOP,    "TOP",    "TOPLEFT",    UIParent, "BOTTOMLEFT")
-        renderBlock(blocks.BOTTOM, "BOTTOM", "BOTTOMLEFT", UIParent, "TOPLEFT")
+        renderBlock(blocks.TOP,    "TOP",    "TOPLEFT",    _G.UIParent, "BOTTOMLEFT")
+        renderBlock(blocks.BOTTOM, "BOTTOM", "BOTTOMLEFT", _G.UIParent, "TOPLEFT")
     else
-        renderBlock(blocks.BOTTOM, "BOTTOM", "BOTTOMLEFT", UIParent, "TOPLEFT")
-        renderBlock(blocks.TOP,    "TOP",    "TOPLEFT",    UIParent, "BOTTOMLEFT")
+        renderBlock(blocks.BOTTOM, "BOTTOM", "BOTTOMLEFT", _G.UIParent, "TOPLEFT")
+        renderBlock(blocks.TOP,    "TOP",    "TOPLEFT",    _G.UIParent, "BOTTOMLEFT")
     end
 
     for _, entry in ipairs(blocks.FREE) do
@@ -679,7 +522,7 @@ function ascensionBars:updateLayout(shouldHideXP)
         local config = bars[entry.key]
         if config then
             obj.bar:ClearAllPoints()
-            obj.bar:SetPoint("CENTER", UIParent, "CENTER", config.freeX or 0, config.freeY or 0)
+            obj.bar:SetPoint("CENTER", _G.UIParent, "CENTER", config.freeX or 0, config.freeY or 0)
             obj.bar:SetWidth(config.freeWidth or screenW)
             obj.bar:SetHeight(getBarHeight(entry))
             if obj.txFrame then obj.txFrame:SetAllPoints(obj.bar) end
@@ -741,240 +584,4 @@ function ascensionBars:updateVisibility()
     end
 
     if self.textHolder then self.textHolder:SetAlpha(baseAlpha) end
-end
-
-
--------------------------------------------------------------------------------
--- INITIALIZATION
--------------------------------------------------------------------------------
-
-function ascensionBars:OnInitialize()
-    local db = LibStub("AceDB-3.0"):New("AscensionProgressDataBarsDB", self.defaults, true)
-    self.db = db
-
-    self.db.RegisterCallback(self, "OnProfileChanged", "refreshConfig")
-    self.db.RegisterCallback(self, "OnProfileCopied",  "refreshConfig")
-    self.db.RegisterCallback(self, "OnProfileReset",   "refreshConfig")
-
-    local function migrateOldSettings()
-        if not db.profile then return end
-        local p = db.profile
-        if p.textGroups       then p.textGroups       = nil end
-        if p.usePerGroupSize  ~= nil then p.usePerGroupSize  = nil end
-        if p.usePerGroupColor ~= nil then p.usePerGroupColor = nil end
-        if p.textLayoutMode   ~= nil then p.textLayoutMode   = nil end
-        if p.textFollowBar    ~= nil then p.textFollowBar    = nil end
-        if p.bars then
-            for _, v in pairs(p.bars) do
-                if v then
-                    if v.textBlock then v.textBlock = nil end
-                    if v.textOrder then v.textOrder = nil end
-                    if v.textX     then v.textX     = nil end
-                    if v.textY     then v.textY     = nil end
-                end
-            end
-        end
-    end
-
-    migrateOldSettings()
-
-    self.state = {
-        isConfigMode     = false,
-        isHovering       = false,
-        inCombat         = false,
-        updatePending    = false,
-        hoveredBarKey    = nil,
-        legendHovered    = false,
-        cachedClassColor = nil,
-        lastXP           = 0,
-        lastXPMax        = 0,
-        lastHonor        = 0,
-        lastReputation   = {},
-        lastAzeriteXP    = 0,
-        lastHouseFavor   = {},
-    }
-
-    local defaultFont = [[Fonts\FRIZQT__.TTF]]
-    self.fontToUse = defaultFont
-    if _G.GameFontNormal and _G.GameFontNormal.GetFont then
-        local fontPath = _G.GameFontNormal:GetFont()
-        if fontPath then
-            self.fontToUse = fontPath
-        end
-    end
-
-    local function toggleConfig()
-        self:toggleConfig()
-    end
-    self:RegisterChatCommand("apb", toggleConfig)
-
-    self:createFrames()
-
-    local AscensionUI = LibStub("AscensionSuit-UI", true)
-    if not AscensionUI then
-        error("AscensionProgressDataBars requires AscensionSuit-UI library from AscensionSuit addon.")
-        return
-    end
-
-    local addonStyles = {
-        colors = self.colors,
-        files = self.files,
-        dimensions = self.menuStyle,
-        fonts = {
-            header = self.menuStyle.headerFont,
-            label = self.menuStyle.labelFont,
-            desc = self.menuStyle.descFont
-        },
-        textures = {
-            bar = self.constants.TEXTURE_BAR,
-            spark = self.constants.TEXTURE_SPARK
-        }
-    }
-
-    local UIContext = AscensionUI:CreateContext(addonStyles)
-    addonTable.UIContext = UIContext
-    addonTable.layoutModel = UIContext.layoutModel
-    addonTable.layoutFactory = UIContext
-end
-
-function ascensionBars:OnEnable()
-    self.state.isConfigMode  = false
-    self.state.isHovering    = false
-    self.state.inCombat      = false
-    self.state.cachedClassColor = nil
-
-    -- Core-level global events only — bar-specific events are owned by each module
-    local coreEvents = {
-        ["PLAYER_ENTERING_WORLD"] = "onPlayerEnteringWorld",
-        ["PLAYER_REGEN_DISABLED"] = "onCombatStart",
-        ["PLAYER_REGEN_ENABLED"]  = "onCombatEnd",
-        ["QUEST_TURNED_IN"]       = "onQuestTurnIn",
-        ["NEIGHBORHOOD_NAME_UPDATED"]  = "updateDisplay",
-        ["CVAR_UPDATE"]           = "onCVarUpdate",
-    }
-
-    for event, method in pairs(coreEvents) do
-        if self[method] then
-            self:RegisterEvent(event, method)
-        end
-    end
-
-    if addonTable.dataText and addonTable.dataText.initBarText then
-        for _, bar in pairs(self.activeBars or {}) do
-            if bar then addonTable.dataText:initBarText(bar) end
-        end
-    end
-
-    if C_Reputation and C_Reputation.SetWatchedFactionByID then
-        hooksecurefunc(C_Reputation, "SetWatchedFactionByID", function()
-            self:updateDisplay()
-        end)
-    end
-
-    if C_Housing and C_Housing.SetTrackedHouseGuid then
-        hooksecurefunc(C_Housing, "SetTrackedHouseGuid", function()
-            C_Timer.After(0.15, function()
-                if self.refreshHousingFavor then self:refreshHousingFavor() end
-                self:updateDisplay()
-            end)
-        end)
-    end
-
-    if self.refreshHousingFavor  then self:refreshHousingFavor()  end
-    if self.scanParagonRewards   then self:scanParagonRewards()    end
-    self:hideBlizzardFrames()
-    self:updateDisplay(true)
-end
-
--------------------------------------------------------------------------------
--- CORE EVENT HANDLERS
--------------------------------------------------------------------------------
-
-function ascensionBars:onPlayerEnteringWorld()
-    if self.scanParagonRewards  then self:scanParagonRewards()  end
-    if self.refreshHousingFavor then self:refreshHousingFavor() end
-
-    if not self.state then return end
-    self.state.lastXP      = UnitXP("player")     or 0
-    self.state.lastXPMax   = UnitXPMax("player")  or 0
-    self.state.lastHonor   = UnitHonor("player")  or 0
-    self.state.lastHonorMax = UnitHonorMax("player") or 0
-
-    if C_AzeriteItem and C_AzeriteItem.FindActiveAzeriteItem then
-        local itemLoc = C_AzeriteItem.FindActiveAzeriteItem()
-        if itemLoc and C_AzeriteItem.GetAzeriteItemXPInfo then
-            self.state.lastAzeriteXP = C_AzeriteItem.GetAzeriteItemXPInfo(itemLoc) or 0
-        end
-    end
-
-    self:updateDisplay(true)
-end
-
-function ascensionBars:onCombatStart()
-    if self.state then self.state.inCombat = true end
-    self:updateVisibility()
-    if self.updateCarouselVisibility then self:updateCarouselVisibility() end
-end
-
-function ascensionBars:onCombatEnd()
-    if self.state then self.state.inCombat = false end
-    self:updateVisibility()
-    if self.updateCarouselVisibility then self:updateCarouselVisibility() end
-    if self.startCarousel then self:startCarousel() end
-end
-
-function ascensionBars:onQuestTurnIn()
-    C_Timer.After(1, function()
-        if self.scanParagonRewards then self:scanParagonRewards() end
-    end)
-end
-
-function ascensionBars:onCVarUpdate(_, name, _)
-    if name == "trackedHouseFavor" then
-        C_Timer.After(0.15, function()
-            if self.refreshHousingFavor then self:refreshHousingFavor() end
-            self:updateDisplay()
-        end)
-    end
-end
-
-function ascensionBars:OnDisable()
-    self:cleanupTextures()
-    for _, barObj in pairs(self.activeBars or {}) do
-        if barObj and barObj.bar then barObj.bar:Hide() end
-    end
-    if self.textHolder then self.textHolder:Hide() end
-end
-
-function ascensionBars:refreshConfig()
-    -- Ensure all dynamic bars (e.g. extra reputations) from the new profile exist
-    if self.db and self.db.profile and self.db.profile.bars then
-        for k, _ in pairs(self.db.profile.bars) do
-            if string.match(k, "^Rep_%d+$") then
-                self:createDynamicBar(k)
-            end
-        end
-    end
-
-    -- Refresh the configuration UI if it's currently loaded
-    if self.refreshConfigUI then
-        self:refreshConfigUI()
-    end
-
-    -- Update the actual bars on screen
-    self:updateDisplay(true)
-end
-
-function ascensionBars:toggleConfig()
-    if not self.configFrame then
-        self:refreshConfigUI()
-    end
-    if self.configFrame then
-        local isOpening = not self.configFrame:IsShown()
-        self.configFrame:SetShown(isOpening)
-        if not isOpening then
-            self.state.isConfigMode = false
-            self:updateDisplay(true)
-        end
-    end
 end

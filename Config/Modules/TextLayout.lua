@@ -3,20 +3,15 @@
 -- Author: Aka-DoctorCode
 -- File: TextLayout.lua
 -------------------------------------------------------------------------------
--- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
---
--- This software and its source code are the exclusive property of the author.
--- No part of this file may be copied, modified, redistributed, or used in
--- derivative works without express written permission.
--------------------------------------------------------------------------------
+---@diagnostic disable: undefined-global, undefined-field, inject-field
 
 local addonName, addonTable = ...
----@type AscensionBars
+
 local ascensionBars = addonTable.main or LibStub("AceAddon-3.0"):GetAddon(addonName)
----@cast ascensionBars AscensionBars
+
 local locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
-local colors = ascensionBars.colors
-local menuStyle = ascensionBars.menuStyle
+local colors = setmetatable({}, { __index = function(t, k) return ascensionBars.colors and ascensionBars.colors[k] end })
+local menuStyle = setmetatable({}, { __index = function(t, k) return ascensionBars.menuStyle and ascensionBars.menuStyle[k] end })
 
 local function L(key, fallback)
     local success, val = pcall(function() return locales[key] end)
@@ -47,7 +42,7 @@ function textLayoutTab:build(panel)
 
     local y = -15
 
-    local mainLayout = addonTable.layoutModel:new(content, y)
+    local mainLayout = addonTable.layoutModel:new(nil, content, y)
 
     ---------------------------------------------------------------------------
     -- SECTION 1: BASE TYPOGRAPHY

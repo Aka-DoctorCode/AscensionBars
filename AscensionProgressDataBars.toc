@@ -1,9 +1,9 @@
 ## Interface: 120005
 ## Title: Ascension Progress Data Bar
-## Notes: Minimalistic replacement  bars for reputation, experience, honor, housing favor and other. Create custom bars for other reputations tracking. Paragon and house upgrades reward availability reminder
+## Notes: Minimalistic replacement bars for reputation, experience, honor, housing favor and other. Create custom bars for other reputations tracking. Paragon and house upgrades reward availability reminder
 ## Author: AkaDoctorCode
 ## Category: Interface
-## Version: @project-version@
+## Version: V48
 ## SavedVariables: AscensionProgressDataBarsDB
 ## RequiredDeps: AscensionSuit
 ## IconTexture: Interface\AddOns\AscensionProgressDataBars\Media\AkaDoctorCode.png
@@ -18,27 +18,29 @@ Locales\deDE.lua
 Locales\ruRU.lua
 
 # Core
-AscensionProgressDataBars.lua
-Constants.lua
-Styles.lua
-Bars\DataText.lua
-Bars\Experience.lua
-Bars\ParagonManager.lua
-Bars\Reputation.lua
-Bars\Honor.lua
-Bars\Housing.lua
-Bars\Azerite.lua
-Bars\Legend.lua
-Bars\Carousel.lua
+Core/AscensionProgressDataBars.lua
+Core/Constants.lua
+Core/BarManager.lua
+Core/Events.lua
+
+# Modules (Bars)
+Modules/DataText.lua
+Modules/Experience.lua
+Modules/ParagonManager.lua
+Modules/Reputation.lua
+Modules/Honor.lua
+Modules/Housing.lua
+Modules/Azerite.lua
+Modules/Legend.lua
+Modules/Carousel.lua
 
 # Config Panel
-ConfigPanel/ConfigUtils.lua
-ConfigPanel/BarsLayout.lua
-ConfigPanel/CustomGrid.lua
-ConfigPanel/TextLayout.lua
-ConfigPanel/Behavior.lua
-ConfigPanel/Colors.lua
-ConfigPanel/ParagonAlerts.lua
-ConfigPanel/BlizzardIntegration.lua
-ConfigPanel/Profiles.lua
-Config.lua
+Config/Modules/ConfigUtils.lua
+Config/Modules/BarsLayout.lua
+Config/Modules/CustomGrid.lua
+Config/Modules/TextLayout.lua
+Config/Modules/Behavior.lua
+Config/Modules/Colors.lua
+Config/Modules/ParagonAlerts.lua
+Config/Modules/Profiles.lua
+Config/Main.lua

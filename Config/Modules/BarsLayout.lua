@@ -3,22 +3,16 @@
 -- Author: Aka-DoctorCode
 -- File: BarsLayout.lua
 -------------------------------------------------------------------------------
--- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
---
--- This software and its source code are the exclusive property of the author.
--- No part of this file may be copied, modified, redistributed, or used in
--- derivative works without express written permission.
--------------------------------------------------------------------------------
+---@diagnostic disable: undefined-global, undefined-field, inject-field
 
 local addonName, addonTable = ...
----@type AscensionBars
-local ascensionBars = addonTable.main or _G.LibStub("AceAddon-3.0"):GetAddon(addonName)
----@cast ascensionBars AscensionBars
-local locales = _G.LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
 
--- Use the shared utilities that will be defined in our main ConfigMain.lua
-local colors = ascensionBars.colors
-local menuStyle = ascensionBars.menuStyle
+local ascensionBars = addonTable.main or _G.LibStub("AceAddon-3.0"):GetAddon(addonName)
+
+local locales = _G.LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
+local colors = setmetatable({}, { __index = function(t, k) return ascensionBars.colors and ascensionBars.colors[k] end })
+local menuStyle = setmetatable({}, { __index = function(t, k) return ascensionBars.menuStyle and ascensionBars.menuStyle[k] end })
+
 
 -- Object-Oriented module for the Bars Layout Tab
 addonTable.barsLayoutTab = {}
@@ -253,7 +247,7 @@ function barsLayoutTab:build(panel)
     local colGap = 10
     local y = -15
 
-    local mainLayout = addonTable.layoutModel:new(content, y)
+    local mainLayout = addonTable.layoutModel:new(nil, content, y)
     mainLayout:header("GlobalOffsetHeader", locales["GLOBAL_SETTINGS"] or "Global Settings")
 
     local topColWidth = (defaultAvailableSpace - colGap) / 2
@@ -375,7 +369,7 @@ function barsLayoutTab:build(panel)
 
     for _, block in ipairs(blocks) do
         -- Reset layout start to barStartY for each column to keep them parallel
-        local layoutCol = addonTable.layoutModel:new(content, barStartY)
+        local layoutCol = addonTable.layoutModel:new(nil, content, barStartY)
 
         local header = content:CreateFontString(nil, "OVERLAY", menuStyle.labelFont)
         header:SetPoint("TOPLEFT", block.x, barStartY)
@@ -433,7 +427,7 @@ function barsLayoutTab:build(panel)
     -- SECTION: FREE MODE INITIALIZATION
     -- Positioned relative to deepestY to prevent overlap with parallel columns
     local freeStartY = deepestY
-    local layoutFree = addonTable.layoutModel:new(content, freeStartY)
+    local layoutFree = addonTable.layoutModel:new(nil, content, freeStartY)
 
     local freeHeader = content:CreateFontString(nil, "OVERLAY", menuStyle.labelFont)
     freeHeader:SetPoint("TOPLEFT", 10, freeStartY)

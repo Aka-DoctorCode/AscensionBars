@@ -1,30 +1,25 @@
 -------------------------------------------------------------------------------
 -- Project: AscensionProgressDataBars
 -- Author: Aka-DoctorCode
--- File: Config.lua
+-- File: Main.lua
 -------------------------------------------------------------------------------
--- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
---
--- This software and its source code are the exclusive property of the author.
--- No part of this file may be copied, modified, redistributed, or used in
--- derivative works without express written permission.
--------------------------------------------------------------------------------
+---@diagnostic disable: undefined-global, undefined-field, inject-field
 
 
 local addonName, addonTable = ...
----@type AscensionBars
 local ascensionBars = addonTable.main or LibStub("AceAddon-3.0"):GetAddon(addonName)
 local locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
-local colors = ascensionBars.colors
-local files = ascensionBars.files
-local menuStyle = ascensionBars.menuStyle
+
 -- Configuration frame setup
-function createConfigFrame()
+function CreateConfigFrame()
     local UIContext = addonTable.UIContext
     if not UIContext then return end
+
+    local colors = ascensionBars.colors
+    local files = ascensionBars.files
+    local menuStyle = ascensionBars.menuStyle
     if ascensionBars.configFrame then return end
 
-    ---@cast ascensionBars AscensionBars
     ascensionBars.configFrame = CreateFrame("Frame", "AscensionBarsConfigFrame", _G.UIParent, "BackdropTemplate")
     local configFrame = ascensionBars.configFrame
     configFrame:SetFrameStrata("DIALOG")
@@ -173,7 +168,7 @@ end
 -- UI refresh handler
 function ascensionBars:refreshConfigUI()
     if not self.configFrame then
-        createConfigFrame()
+        CreateConfigFrame()
     end
 
     if self.configFrame then
@@ -190,7 +185,7 @@ function ascensionBars:refreshConfigUI()
         self.configTabs = nil
 
         -- Re-initialize
-        createConfigFrame()
+        CreateConfigFrame()
 
         if wasShown then
             self.configFrame:Show()
@@ -200,5 +195,3 @@ function ascensionBars:refreshConfigUI()
         end
     end
 end
-
--- REFRESH CONFIG: Handled in core-addon via refreshConfigUI calls

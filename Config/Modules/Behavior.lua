@@ -3,17 +3,12 @@
 -- Author: Aka-DoctorCode
 -- File: Behavior.lua
 -------------------------------------------------------------------------------
--- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
---
--- This software and its source code are the exclusive property of the author.
--- No part of this file may be copied, modified, redistributed, or used in
--- derivative works without express written permission.
--------------------------------------------------------------------------------
+---@diagnostic disable: undefined-global, undefined-field, inject-field
 
 local addonName, addonTable = ...
----@type AscensionBars
+
 local ascensionBars = addonTable.main or LibStub("AceAddon-3.0"):GetAddon(addonName)
----@cast ascensionBars AscensionBars
+
 local locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
 
 -- Object-Oriented module for the Behavior Tab
@@ -29,7 +24,7 @@ function behaviorTab:build(panel)
     local profile = ascensionBars.db.profile
     if not profile then return end
 
-    local layout = addonTable.layoutModel:new(content, -15)
+    local layout = addonTable.layoutModel:new(nil, content, -15)
     
     -- Auto Hide Logic Section
     layout:header("AutoHideLogicHeader", locales["AUTO_HIDE_LOGIC"])

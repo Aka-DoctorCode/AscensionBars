@@ -3,22 +3,16 @@
 -- Author: Aka-DoctorCode
 -- File: Colors.lua
 -------------------------------------------------------------------------------
--- Copyright (c) 2025–2026 Aka-DoctorCode. All Rights Reserved.
---
--- This software and its source code are the exclusive property of the author.
--- No part of this file may be copied, modified, redistributed, or used in
--- derivative works without express written permission.
--------------------------------------------------------------------------------
+---@diagnostic disable: undefined-global, undefined-field, inject-field
 
 local addonName, addonTable = ...
----@type AscensionBars
-local ascensionBars = addonTable.main or LibStub("AceAddon-3.0"):GetAddon(addonName)
----@cast ascensionBars AscensionBars
-local locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
 
--- Shared utilities mapped from the main table
-local colors = ascensionBars.colors
-local menuStyle = ascensionBars.menuStyle
+local ascensionBars = addonTable.main or LibStub("AceAddon-3.0"):GetAddon(addonName)
+
+local locales = LibStub("AceLocale-3.0"):GetLocale("AscensionProgressDataBars")
+local colors = setmetatable({}, { __index = function(t, k) return ascensionBars.colors and ascensionBars.colors[k] end })
+local menuStyle = setmetatable({}, { __index = function(t, k) return ascensionBars.menuStyle and ascensionBars.menuStyle[k] end })
+
 
 -- Object-Oriented module for the Colors Tab
 addonTable.colorsTab = {}
@@ -43,8 +37,8 @@ function colorsTab:build(panel)
     local startY = -15
     
     -- Independent Layout Models for the 2 columns
-    local col1Layout = addonTable.layoutModel:new(content, startY)
-    local col2Layout = addonTable.layoutModel:new(content, startY)
+    local col1Layout = addonTable.layoutModel:new(nil, content, startY)
+    local col2Layout = addonTable.layoutModel:new(nil, content, startY)
 
     -- Helper to safely trigger layout reflows when checking boxes
     local function triggerLayoutUpdate()
