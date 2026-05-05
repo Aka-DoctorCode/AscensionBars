@@ -183,12 +183,20 @@ Locales["GROUP_3"] = "Группа 3"
 -------------------------------------------------------------------------------
 Locales["AUTO_HIDE_LOGIC"] = "Логика авто-скрытия"
 Locales["SHOW_ON_MOUSEOVER"] = "Показывать при наведении"
+Locales["SHOW_ON_MOUSEOVER_DESC"] = "Скрывает панели, пока на них не наведен курсор мыши."
 Locales["HIDE_IN_COMBAT"] = "Скрывать в бою"
+Locales["HIDE_IN_COMBAT_DESC"] = "Автоматически скрывает панели во время боя."
 Locales["HIDE_AT_MAX_LEVEL"] = "Скрывать опыт на макс. уровне"
+Locales["HIDE_AT_MAX_LEVEL_DESC"] = "Автоматически скрывает полосу опыта на максимальном уровне."
 Locales["DATA_DISPLAY"] = "Отображение данных"
 Locales["SHOW_PERCENTAGE"] = "Показывать проценты"
+Locales["SHOW_PERCENTAGE_DESC"] = "Показывает текущий прогресс в процентах."
 Locales["SHOW_ABSOLUTE_VALUES"] = "Показывать абсолютные значения"
+Locales["SHOW_ABSOLUTE_VALUES_DESC"] = "Показывает точные числовые значения прогресса."
+Locales["USE_COMPACT_FORMAT_DESC"] = "Использует сокращения для больших чисел (например, 1.5K)."
 Locales["SHOW_SPARK"] = "Показывать искру"
+Locales["SHOW_SPARK_DESC"] = "Добавляет эффект искры на краю полосы прогресса."
+Locales["BARS_HIDDEN_FEEDBACK"] = "Панели скрыты - наведите мышь или выйдите из боя."
 
 -------------------------------------------------------------------------------
 -- COLORS TAB

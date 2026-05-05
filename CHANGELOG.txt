@@ -1,7 +1,7 @@
 <h1>@project-version@</h1>
 <ul>
-    <li>Refactor: Code moved to BarManager and CoreEvents for better logic flow.</li>
-    <li>Style: Default project aesthetics migrated directly into AscensionSuit library.</li>
+    <li>Feature: Added tooltips to Behavior tab checkboxes.</li>
+    <li>Feature: Added visual feedback when auto-hide logic is active.</li>
 </ul>
 <br>
 <h2>Positive feedback is always appreciated, it helps me to continue working on this project</h2>

@@ -183,12 +183,20 @@ Locales["GROUP_3"] = "Gruppe 3"
 -------------------------------------------------------------------------------
 Locales["AUTO_HIDE_LOGIC"] = "Automatisches Ausblenden"
 Locales["SHOW_ON_MOUSEOVER"] = "Bei Mauskontakt anzeigen"
+Locales["SHOW_ON_MOUSEOVER_DESC"] = "Blendet die Balken aus, bis der Mauszeiger darüber bewegt wird."
 Locales["HIDE_IN_COMBAT"] = "Im Kampf ausblenden"
+Locales["HIDE_IN_COMBAT_DESC"] = "Blenden die Balken während des Kampfes automatisch aus."
 Locales["HIDE_AT_MAX_LEVEL"] = "EP-Balken bei Maximalstufe ausblenden"
+Locales["HIDE_AT_MAX_LEVEL_DESC"] = "Blendet den Erfahrungsbalken auf der Maximalstufe automatisch aus."
 Locales["DATA_DISPLAY"] = "Datenanzeige"
 Locales["SHOW_PERCENTAGE"] = "Prozentsatz anzeigen"
+Locales["SHOW_PERCENTAGE_DESC"] = "Zeigt den Fortschritt als Prozentsatz an."
 Locales["SHOW_ABSOLUTE_VALUES"] = "Absolute Werte anzeigen"
+Locales["SHOW_ABSOLUTE_VALUES_DESC"] = "Zeigt die genauen Zahlenwerte an."
+Locales["USE_COMPACT_FORMAT_DESC"] = "Verwendet Abkürzungen für große Zahlen (z.B. 1.5K)."
 Locales["SHOW_SPARK"] = "Glanz anzeigen"
+Locales["SHOW_SPARK_DESC"] = "Fügt einen Glanzeffekt am Ende des Fortschrittsbalkens hinzu."
+Locales["BARS_HIDDEN_FEEDBACK"] = "Balken ausgeblendet - Maus darüber bewegen oder Kampf beenden."
 
 -------------------------------------------------------------------------------
 -- COLORS TAB

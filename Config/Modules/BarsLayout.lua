@@ -14,19 +14,80 @@ local colors = setmetatable({}, { __index = function(t, k) return ascensionBars.
 local menuStyle = setmetatable({}, { __index = function(t, k) return ascensionBars.menuStyle and ascensionBars.menuStyle[k] end })
 
 
--- Object-Oriented module for the Bars Layout Tab
-addonTable.barsLayoutTab = {}
-local barsLayoutTab = addonTable.barsLayoutTab
+local function buildAnchorDropdown(layout, profile, bar, barKey, panel, width, x)
+    layout:dropdown("AnchorDropdown_" .. barKey, locales["ANCHOR"],
+        { { label = locales["TOP"], value = "TOP" }, { label = locales["BOTTOM"], value = "BOTTOM" }, { label = locales["FREE"], value = "FREE" } },
+        function() return bar.block end,
+        function(v)
+            local old = bar.block; bar.block = v
+            addonTable.configUtils:cleanOrders(profile, "block", "order", old)
+            bar.order = math.max(1, addonTable.configUtils:getCount(profile, "block", v))
+
+            if profile.customGrids and profile.customGrids[old] and profile.customGrids[old].assignments then
+                for r, row in pairs(profile.customGrids[old].assignments) do
+                    for c, assignedBar in pairs(row) do
+                        if assignedBar == barKey then
+                            profile.customGrids[old].assignments[r][c] = "none"
+                        end
+                    end
+                end
+            end
+
+            if ascensionBars.updateDisplay then ascensionBars:updateDisplay() end
+            if panel.updateLayout then
+                _G.C_Timer.After(0.01, function()
+                    if panel.updateLayout then panel:updateLayout() end
+                end)
+            end
+        end, width, x)
+end
 
 -------------------------------------------------------------------------------
 -- CORE LAYOUT BUILDER
 -------------------------------------------------------------------------------
 
+local function getBarColor(barKey, profile)
+    if barKey == "XP" then
+        if profile.useClassColorXP then
+            local _, class = _G.UnitClass("player")
+            local color = _G.RAID_CLASS_COLORS[class]
+            return color.r, color.g, color.b, 1
+        end
+        local c = profile.xpBarColor
+        return c.r, c.g, c.b, 1
+    elseif barKey == "Honor" then
+        local c = profile.honorColor
+        return c.r, c.g, c.b, 1
+    elseif barKey == "HouseXp" then
+        local c = profile.houseXpColor
+        return c.r, c.g, c.b, 1
+    elseif barKey == "Azerite" then
+        local c = profile.azeriteColor
+        return c.r, c.g, c.b, 1
+    elseif barKey == "Rep" or string.match(barKey, "^Rep_%d+$") then
+        if profile.useReactionColorRep then
+            return 0, 0.8, 0.4, 1 -- Neutral reputation green
+        end
+        local c = profile.repBarColor
+        return c.r, c.g, c.b, 1
+    end
+    return 0.5, 0.5, 0.5, 1
+end
+
 function barsLayoutTab:createBarControls(layout, profile, barKey, displayName, panel, controlWidth, xOffset)
     if not layout or not panel or not profile or not profile.bars or not profile.bars[barKey] then return end
     local bar = profile.bars[barKey]
 
-    layout:beginSection(xOffset, controlWidth)
+    local section = layout:beginSection(xOffset, controlWidth)
+    if section and section.CreateTexture then
+        local stripe = section:CreateTexture(nil, "OVERLAY")
+        stripe:SetPoint("TOPLEFT", 2, -2)
+        stripe:SetPoint("TOPRIGHT", -2, -2)
+        stripe:SetHeight(3)
+        stripe:SetTexture("Interface\\Buttons\\WHITE8X8")
+        local r, g, b, a = getBarColor(barKey, profile)
+        stripe:SetVertexColor(r, g, b, a or 1)
+    end
 
     layout:label("BarHeader_" .. barKey, displayName, xOffset + 5, colors.gold)
 
@@ -58,31 +119,7 @@ function barsLayoutTab:createBarControls(layout, profile, barKey, displayName, p
         local endLeft = layout.y
 
         layout.y = row1Y
-        layout:dropdown("AnchorDropdown_" .. barKey, locales["ANCHOR"],
-            { { label = locales["TOP"], value = "TOP" }, { label = locales["BOTTOM"], value = "BOTTOM" }, { label = locales["FREE"], value = "FREE" } },
-            function() return bar.block end,
-            function(v)
-                local old = bar.block; bar.block = v
-                addonTable.configUtils:cleanOrders(profile, "block", "order", old)
-                bar.order = math.max(1, addonTable.configUtils:getCount(profile, "block", v))
-
-                if profile.customGrids and profile.customGrids[old] and profile.customGrids[old].assignments then
-                    for r, row in pairs(profile.customGrids[old].assignments) do
-                        for c, assignedBar in pairs(row) do
-                            if assignedBar == barKey then
-                                profile.customGrids[old].assignments[r][c] = "none"
-                            end
-                        end
-                    end
-                end
-
-                if ascensionBars.updateDisplay then ascensionBars:updateDisplay() end
-                if panel.updateLayout then
-                    _G.C_Timer.After(0.01, function()
-                        if panel.updateLayout then panel:updateLayout() end
-                    end)
-                end
-            end, halfWidth, col2X)
+        buildAnchorDropdown(layout, profile, bar, barKey, panel, halfWidth, col2X)
         local endRight = layout.y
         finalY = math.min(endLeft, endRight)
 
@@ -152,27 +189,7 @@ function barsLayoutTab:createBarControls(layout, profile, barKey, displayName, p
 
         local row2Y = finalY - 2
         layout.y = row2Y
-        layout:dropdown("AnchorDropdown_" .. barKey, locales["ANCHOR"],
-            { { label = locales["TOP"], value = "TOP" }, { label = locales["BOTTOM"], value = "BOTTOM" }, { label = locales["FREE"], value = "FREE" } },
-            function() return bar.block end,
-            function(v)
-                local old = bar.block; bar.block = v
-                addonTable.configUtils:cleanOrders(profile, "block", "order", old)
-                bar.order = math.max(1, addonTable.configUtils:getCount(profile, "block", v))
-
-                if profile.customGrids and profile.customGrids[old] and profile.customGrids[old].assignments then
-                    for r, row in pairs(profile.customGrids[old].assignments) do
-                        for c, assignedBar in pairs(row) do
-                            if assignedBar == barKey then
-                                profile.customGrids[old].assignments[r][c] = "none"
-                            end
-                        end
-                    end
-                end
-
-                if ascensionBars.updateDisplay then ascensionBars:updateDisplay() end
-                if panel.updateLayout then _G.C_Timer.After(0.01, function() panel:updateLayout() end) end
-            end, halfWidth, col1X)
+        buildAnchorDropdown(layout, profile, bar, barKey, panel, halfWidth, col1X)
         endLeft = layout.y
 
         layout.y = row2Y

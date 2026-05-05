@@ -183,12 +183,20 @@ Locales["GROUP_3"] = "Grupo 3"
 -------------------------------------------------------------------------------
 Locales["AUTO_HIDE_LOGIC"] = "Lógica de auto-ocultación"
 Locales["SHOW_ON_MOUSEOVER"] = "Mostrar al pasar el ratón"
+Locales["SHOW_ON_MOUSEOVER_DESC"] = "Cuando está activado, las barras de datos permanecerán invisibles hasta que pases el cursor sobre su ubicación. Esto ayuda a mantener la pantalla limpia mientras permite un acceso rápido a tu progreso."
 Locales["HIDE_IN_COMBAT"] = "Ocultar en combate"
+Locales["HIDE_IN_COMBAT_DESC"] = "Oculta automáticamente todas las barras de datos al entrar en combate para eliminar distracciones. Reaparecerán automáticamente al finalizar el combate."
 Locales["HIDE_AT_MAX_LEVEL"] = "Ocultar barra de experiencia al nivel máximo"
+Locales["HIDE_AT_MAX_LEVEL_DESC"] = "Oculta automáticamente la barra de experiencia cuando tu personaje alcanza el nivel máximo, ya que no se ganan más puntos de experiencia."
 Locales["DATA_DISPLAY"] = "Visualización de datos"
 Locales["SHOW_PERCENTAGE"] = "Mostrar porcentaje"
+Locales["SHOW_PERCENTAGE_DESC"] = "Muestra el progreso actual como un valor porcentual (ej. 45.5%) junto con el resto del texto en las barras."
 Locales["SHOW_ABSOLUTE_VALUES"] = "Mostrar valores absolutos"
+Locales["SHOW_ABSOLUTE_VALUES_DESC"] = "Muestra los valores numéricos exactos de tu progreso actual y máximo (ej. 1500 / 3000) en las barras."
+Locales["USE_COMPACT_FORMAT_DESC"] = "Acorta los números grandes usando abreviaturas (ej. 1.5K en lugar de 1500) para ahorrar espacio."
 Locales["SHOW_SPARK"] = "Mostrar destello"
+Locales["SHOW_SPARK_DESC"] = "Añade un destello brillante en el borde de la barra de progreso para ver mejor dónde está tu progreso actual de un vistazo."
+Locales["BARS_HIDDEN_FEEDBACK"] = "Barras ocultas - pasa el ratón o sal de combate para mostrar"
 
 -------------------------------------------------------------------------------
 -- COLORS TAB

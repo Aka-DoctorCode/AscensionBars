@@ -185,12 +185,20 @@ Locales["GROUP_3"] = "Group 3"
 -------------------------------------------------------------------------------
 Locales["AUTO_HIDE_LOGIC"] = "Auto-Hide Logic"
 Locales["SHOW_ON_MOUSEOVER"] = "Show on Mouseover"
+Locales["SHOW_ON_MOUSEOVER_DESC"] = "When enabled, the data bars will remain invisible until you move your mouse cursor over their location. This helps keep your screen clean while still allowing quick access to your progress."
 Locales["HIDE_IN_COMBAT"] = "Hide in Combat"
+Locales["HIDE_IN_COMBAT_DESC"] = "Automatically fades out all data bars as soon as you enter combat to remove distractions. They will reappear automatically once combat ends."
 Locales["HIDE_AT_MAX_LEVEL"] = "Hide XP Bar at Max Level"
+Locales["HIDE_AT_MAX_LEVEL_DESC"] = "Automatically hides the Experience bar when your character reaches the maximum level for the current expansion, as experience points are no longer gained."
 Locales["DATA_DISPLAY"] = "Data Display"
 Locales["SHOW_PERCENTAGE"] = "Show Percentage"
+Locales["SHOW_PERCENTAGE_DESC"] = "Displays the current progress as a percentage value (e.g., 45.5%) alongside the other text on the progress bars."
 Locales["SHOW_ABSOLUTE_VALUES"] = "Show Absolute Values"
+Locales["SHOW_ABSOLUTE_VALUES_DESC"] = "Displays the exact numerical values for your current and maximum progress (e.g., 1500 / 3000) on the bars."
+Locales["USE_COMPACT_FORMAT_DESC"] = "Shortens large numbers using abbreviations (e.g., 1.5K instead of 1500, or 2M instead of 2000000) to save space."
 Locales["SHOW_SPARK"] = "Show Spark"
+Locales["SHOW_SPARK_DESC"] = "Adds a bright, glowing spark effect at the leading edge of the progress bar to make it easier to see exactly where your current progress is at a glance."
+Locales["BARS_HIDDEN_FEEDBACK"] = "Bars hidden - hover or exit combat to show"
 
 -------------------------------------------------------------------------------
 -- COLORS TAB
