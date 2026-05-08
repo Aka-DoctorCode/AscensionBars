@@ -14,6 +14,14 @@ local colors = setmetatable({}, { __index = function(t, k) return ascensionBars.
 local menuStyle = setmetatable({}, { __index = function(t, k) return ascensionBars.menuStyle and ascensionBars.menuStyle[k] end })
 
 
+-- Object-Oriented module for the Bars Layout Tab
+addonTable.barsLayoutTab = {}
+local barsLayoutTab = addonTable.barsLayoutTab
+
+-------------------------------------------------------------------------------
+-- HELPERS
+-------------------------------------------------------------------------------
+
 local function buildAnchorDropdown(layout, profile, bar, barKey, panel, width, x)
     layout:dropdown("AnchorDropdown_" .. barKey, locales["ANCHOR"],
         { { label = locales["TOP"], value = "TOP" }, { label = locales["BOTTOM"], value = "BOTTOM" }, { label = locales["FREE"], value = "FREE" } },
@@ -42,54 +50,80 @@ local function buildAnchorDropdown(layout, profile, bar, barKey, panel, width, x
         end, width, x)
 end
 
+local function getBarColor(barKey, profile)
+    local color = profile.repBarColor or { r = 0, g = 1, b = 0, a = 1 }
+    if barKey == "XP" then
+        color = profile.xpBarColor
+    elseif barKey == "Honor" then
+        color = profile.honorColor
+    elseif barKey == "HouseXp" then
+        color = profile.houseXpColor
+    elseif barKey == "Azerite" then
+        color = profile.azeriteColor
+    elseif string.match(barKey, "^Rep") then
+        local fID
+        if barKey == "Rep" then
+            local wd = _G.C_Reputation and _G.C_Reputation.GetWatchedFactionData and _G.C_Reputation.GetWatchedFactionData()
+            fID = wd and wd.factionID
+        else
+            fID = tonumber(string.match(barKey, "%d+"))
+        end
+
+        if fID and profile.useCustomFactionColors then
+            local custom = profile.factionColors and profile.factionColors[fID]
+            if not custom and ascensionBars.constants and ascensionBars.constants.FACTION_COLORS then
+                custom = ascensionBars.constants.FACTION_COLORS[fID]
+            end
+            if custom then color = custom end
+        end
+    end
+    return color or { r = 1, g = 1, b = 1, a = 1 }
+end
+
+local function isBarAssignedToGrid(barKey, profile)
+    if not profile.customGridMasterEnabled then return false end
+
+    for _, grid in pairs(profile.customGrids or {}) do
+        if grid.enabled and grid.assignments then
+            for _, row in pairs(grid.assignments) do
+                for _, assignedBar in pairs(row) do
+                    if assignedBar == barKey then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
 -------------------------------------------------------------------------------
 -- CORE LAYOUT BUILDER
 -------------------------------------------------------------------------------
-
-local function getBarColor(barKey, profile)
-    if barKey == "XP" then
-        if profile.useClassColorXP then
-            local _, class = _G.UnitClass("player")
-            local color = _G.RAID_CLASS_COLORS[class]
-            return color.r, color.g, color.b, 1
-        end
-        local c = profile.xpBarColor
-        return c.r, c.g, c.b, 1
-    elseif barKey == "Honor" then
-        local c = profile.honorColor
-        return c.r, c.g, c.b, 1
-    elseif barKey == "HouseXp" then
-        local c = profile.houseXpColor
-        return c.r, c.g, c.b, 1
-    elseif barKey == "Azerite" then
-        local c = profile.azeriteColor
-        return c.r, c.g, c.b, 1
-    elseif barKey == "Rep" or string.match(barKey, "^Rep_%d+$") then
-        if profile.useReactionColorRep then
-            return 0, 0.8, 0.4, 1 -- Neutral reputation green
-        end
-        local c = profile.repBarColor
-        return c.r, c.g, c.b, 1
-    end
-    return 0.5, 0.5, 0.5, 1
-end
 
 function barsLayoutTab:createBarControls(layout, profile, barKey, displayName, panel, controlWidth, xOffset)
     if not layout or not panel or not profile or not profile.bars or not profile.bars[barKey] then return end
     local bar = profile.bars[barKey]
 
-    local section = layout:beginSection(xOffset, controlWidth)
-    if section and section.CreateTexture then
-        local stripe = section:CreateTexture(nil, "OVERLAY")
-        stripe:SetPoint("TOPLEFT", 2, -2)
-        stripe:SetPoint("TOPRIGHT", -2, -2)
-        stripe:SetHeight(3)
-        stripe:SetTexture("Interface\\Buttons\\WHITE8X8")
-        local r, g, b, a = getBarColor(barKey, profile)
-        stripe:SetVertexColor(r, g, b, a or 1)
+    layout:beginSection(xOffset, controlWidth)
+
+    -- Color Swatch Preview (Top Right)
+    if layout.currentSection then
+        local color = getBarColor(barKey, profile)
+        local swatch = layout.currentSection:CreateTexture(nil, "OVERLAY")
+        swatch:SetSize(100, 6)
+        swatch:SetPoint("TOPRIGHT", layout.currentSection, "TOPRIGHT", -3, -3
+    )
+        swatch:SetColorTexture(color.r, color.g, color.b, color.a or 1)
+
+        local border = layout.currentSection:CreateTexture(nil, "BACKGROUND")
+        border:SetSize(17, 8)
+        border:SetPoint("CENTER", swatch, "CENTER", 0, 0)
+        border:SetColorTexture(0, 0, 0, 1)
     end
 
     layout:label("BarHeader_" .. barKey, displayName, xOffset + 5, colors.gold)
+    layout.y = layout.y - 6
 
     local margin = 10
     local internalWidth = controlWidth - (margin * 2)
@@ -110,11 +144,11 @@ function barsLayoutTab:createBarControls(layout, profile, barKey, displayName, p
                 if panel.updateLayout then panel:updateLayout() end
             end)
         else
-            layout:checkbox("EnableBarCheckbox_" .. barKey, locales["ENABLE"], nil,
+            layout:checkbox("EnableBarCheckbox_" .. barKey, locales["ENABLE"], locales["ENABLE_DESC"],
                 function() return bar.enabled end,
                 function(v)
                     bar.enabled = v; ascensionBars:updateDisplay()
-                end, col1X - 6)
+                end, col1X)
         end
         local endLeft = layout.y
 
@@ -168,22 +202,22 @@ function barsLayoutTab:createBarControls(layout, profile, barKey, displayName, p
                 if panel.updateLayout then panel:updateLayout() end
             end)
         else
-            layout:checkbox("EnableBarCheckbox_" .. barKey, locales["ENABLE"], nil,
+            layout:checkbox("EnableBarCheckbox_" .. barKey, locales["ENABLE"], locales["ENABLE_DESC"],
                 function() return bar.enabled end,
                 function(v)
                     bar.enabled = v; ascensionBars:updateDisplay()
-                end, col1X - 6)
+                end, col1X)
         end
         local endLeft = layout.y
 
         layout.y = row1Y
-        layout:checkbox("UseCustomHeightCheckbox_" .. barKey, locales["USE_CUSTOM_HEIGHT"], nil,
+        layout:checkbox("UseCustomHeightCheckbox_" .. barKey, locales["USE_CUSTOM_HEIGHT"], locales["USE_CUSTOM_HEIGHT_DESC"],
             function() return bar.useCustomHeight end,
             function(v)
                 bar.useCustomHeight = v
                 ascensionBars:updateDisplay()
                 if panel.updateLayout then panel:updateLayout() end
-            end, col1X + 120)
+            end, col2X)
         local endRight = layout.y
         finalY = math.min(endLeft, endRight)
 
@@ -282,7 +316,7 @@ function barsLayoutTab:build(panel)
     local afterCol1Row1 = mainLayout.y
     mainLayout.y = startTopY
 
-    mainLayout:checkbox("PerBlockOffsetToggle", locales["PER_BLOCK_OFFSET"] or "Use Per-Block Offset", nil,
+    mainLayout:checkbox("PerBlockOffsetToggle", locales["PER_BLOCK_OFFSET"] or "Use Per-Block Offset", locales["PER_BLOCK_OFFSET_DESC"],
         function() return profile.usePerBlockOffsets end,
         function(v)
             profile.usePerBlockOffsets = v
@@ -290,7 +324,7 @@ function barsLayoutTab:build(panel)
             if panel.updateLayout then _G.C_Timer.After(0.01, function() panel:updateLayout() end) end
         end, topCol2X - 6)
 
-    mainLayout:checkbox("PerBlockGapToggle", locales["PER_BLOCK_GAP"] or "Use Per-Block Gap", nil,
+    mainLayout:checkbox("PerBlockGapToggle", locales["PER_BLOCK_GAP"] or "Use Per-Block Gap", locales["PER_BLOCK_GAP_DESC"],
         function() return profile.usePerBlockGaps end,
         function(v)
             profile.usePerBlockGaps = v
@@ -347,7 +381,7 @@ function barsLayoutTab:build(panel)
     -- BAR MANAGEMENT SECTION
     mainLayout:header("BarManagementHeader", locales["BAR_MANAGEMENT"])
 
-    mainLayout:checkbox("PerBlockHeightToggle", locales["USE_PER_BLOCK_HEIGHT"], nil,
+    mainLayout:checkbox("PerBlockHeightToggle", locales["USE_PER_BLOCK_HEIGHT"], locales["USE_PER_BLOCK_HEIGHT_DESC"],
         function() return profile.usePerBlockHeights end,
         function(v)
             profile.usePerBlockHeights = v
@@ -432,7 +466,9 @@ function barsLayoutTab:build(panel)
 
         -- Render bar controls
         for _, bar in ipairs(sortedBars) do
-            self:createBarControls(layoutCol, profile, bar.key, bar.name, panel, block.width, block.x)
+            if not isBarAssignedToGrid(bar.key, profile) then
+                self:createBarControls(layoutCol, profile, bar.key, bar.name, panel, block.width, block.x)
+            end
         end
 
         -- Track the lowest point across all columns
@@ -467,7 +503,9 @@ function barsLayoutTab:build(panel)
         local barData = profile.bars[key]
         -- Nil check and block validation for runtime safety
         if barData and barData.block == "FREE" then
-            self:createBarControls(layoutFree, profile, key, barNames[i], panel, defaultAvailableSpace, 10)
+            if not isBarAssignedToGrid(key, profile) then
+                self:createBarControls(layoutFree, profile, key, barNames[i], panel, defaultAvailableSpace, 10)
+            end
         end
     end
 

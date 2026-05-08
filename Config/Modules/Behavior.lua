@@ -28,72 +28,67 @@ function behaviorTab:build(panel)
     
     -- Auto Hide Logic Section
     layout:header("AutoHideLogicHeader", locales["AUTO_HIDE_LOGIC"])
+
+    -- Visual Feedback for Auto-Hide
+    if profile.showOnMouseover or profile.hideInCombat then
+        local feedbackText = (profile.showOnMouseover and profile.hideInCombat) 
+            and (locales["BARS_HIDDEN_COMBAT_HOVER"] or "Bars hidden - Hover to show (Hidden in Combat)")
+            or (profile.showOnMouseover and (locales["BARS_HIDDEN_HOVER"] or "Bars hidden - Hover to show"))
+            or (locales["BARS_HIDDEN_COMBAT"] or "Bars hidden in Combat")
+            
+        layout:label("AutoHideFeedback", feedbackText, nil, colors.gold)
+    end
     
-    local cbMouseover = layout:checkbox("ShowOnMouseoverCheckbox", locales["SHOW_ON_MOUSEOVER"], nil,
+    layout:checkbox("ShowOnMouseoverCheckbox", locales["SHOW_ON_MOUSEOVER"], locales["SHOW_ON_MOUSEOVER_DESC"],
         function() return profile.showOnMouseover end,
         function(v)
             profile.showOnMouseover = v
             ascensionBars:updateDisplay()
-            if panel.updateLayout then panel:updateLayout() end
         end)
-    addonTable.configUtils:setTooltip(cbMouseover, locales["SHOW_ON_MOUSEOVER_DESC"] or "Show bars when mouse is over them")
         
-    local cbCombat = layout:checkbox("HideInCombatCheckbox", locales["HIDE_IN_COMBAT"], nil,
+    layout:checkbox("HideInCombatCheckbox", locales["HIDE_IN_COMBAT"], locales["HIDE_IN_COMBAT_DESC"],
         function() return profile.hideInCombat end,
         function(v)
             profile.hideInCombat = v
             ascensionBars:updateDisplay()
-            if panel.updateLayout then panel:updateLayout() end
         end)
-    addonTable.configUtils:setTooltip(cbCombat, locales["HIDE_IN_COMBAT_DESC"] or "Hide bars when in combat")
         
-    local cbMaxLevel = layout:checkbox("HideAtMaxLevelCheckbox", locales["HIDE_AT_MAX_LEVEL"], nil,
+    layout:checkbox("HideAtMaxLevelCheckbox", locales["HIDE_AT_MAX_LEVEL"], locales["HIDE_AT_MAX_LEVEL_DESC"],
         function() return profile.hideAtMaxLevel end,
         function(v)
             profile.hideAtMaxLevel = v
             ascensionBars:updateDisplay()
         end)
-    addonTable.configUtils:setTooltip(cbMaxLevel, locales["HIDE_AT_MAX_LEVEL_DESC"] or "Hide bars at max level")
-
-    if profile.showOnMouseover or profile.hideInCombat then
-        layout.y = layout.y - 10
-        layout:label("HiddenStateFeedback", locales["BARS_HIDDEN_FEEDBACK"] or "Bars hidden - hover or exit combat to show", 15, {1, 0.5, 0, 1})
-        layout.y = layout.y - 10
-    end
 
     -- Data Display Section
     layout:header("DataDisplayHeader", locales["DATA_DISPLAY"])
 
-    local cbPercentage = layout:checkbox("ShowPercentageCheckbox", locales["SHOW_PERCENTAGE"], nil,
+    layout:checkbox("ShowPercentageCheckbox", locales["SHOW_PERCENTAGE"], locales["SHOW_PERCENTAGE_DESC"],
         function() return profile.showPercentage end,
         function(v)
             profile.showPercentage = v
             ascensionBars:updateDisplay()
         end)
-    addonTable.configUtils:setTooltip(cbPercentage, locales["SHOW_PERCENTAGE_DESC"] or "Show percentage text on bars")
         
-    local cbAbsolute = layout:checkbox("ShowAbsoluteValuesCheckbox", locales["SHOW_ABSOLUTE_VALUES"], nil,
+    layout:checkbox("ShowAbsoluteValuesCheckbox", locales["SHOW_ABSOLUTE_VALUES"], locales["SHOW_ABSOLUTE_VALUES_DESC"],
         function() return profile.showAbsoluteValues end,
         function(v)
             profile.showAbsoluteValues = v
             ascensionBars:updateDisplay()
         end)
-    addonTable.configUtils:setTooltip(cbAbsolute, locales["SHOW_ABSOLUTE_VALUES_DESC"] or "Show absolute values text on bars")
 
-    local cbCompact = layout:checkbox("UseCompactFormatToggle", locales["USE_COMPACT_FORMAT"], nil,
+    layout:checkbox("UseCompactFormatToggle", locales["USE_COMPACT_FORMAT"], locales["USE_COMPACT_FORMAT_DESC"],
         function() return profile.useCompactFormat end,
         function(v)
             profile.useCompactFormat = v; ascensionBars:updateDisplay()
         end)
-    addonTable.configUtils:setTooltip(cbCompact, locales["USE_COMPACT_FORMAT_DESC"] or "Use compact number format")
         
-    local cbSpark = layout:checkbox("ShowSparkCheckbox", locales["SHOW_SPARK"], nil,
+    layout:checkbox("ShowSparkCheckbox", locales["SHOW_SPARK"], locales["SHOW_SPARK_DESC"],
         function() return profile.sparkEnabled end,
         function(v)
             profile.sparkEnabled = v
             ascensionBars:updateDisplay()
         end)
-    addonTable.configUtils:setTooltip(cbSpark, locales["SHOW_SPARK_DESC"] or "Show spark on progress bar")
 
     content:SetHeight(math.abs(layout.y) + 20)
 end

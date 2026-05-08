@@ -144,7 +144,7 @@ function textLayoutTab:build(panel)
     startY = mainLayout.y
 
     -- Column 1 (Left)
-    mainLayout:checkbox("EnableCarouselToggle", L("ENABLE_CAROUSEL", "Enable Carousel"), nil,
+    mainLayout:checkbox("EnableCarouselToggle", L("ENABLE_CAROUSEL", "Enable Carousel"), L("ENABLE_CAROUSEL_DESC", "Display a rotating banner of recent Experience and Reputation gains."),
         function() return profile.carouselEnabled end,
         function(v)
             profile.carouselEnabled = v
@@ -152,7 +152,7 @@ function textLayoutTab:build(panel)
             if panel.updateLayout then panel:updateLayout() end
         end, col1X)
 
-    mainLayout:checkbox("LegendEnabledToggle", L("LATERAL_LEGEND", "Lateral Legend"), nil,
+    mainLayout:checkbox("LegendEnabledToggle", L("LATERAL_LEGEND", "Lateral Legend"), L("LATERAL_LEGEND_DESC", "Show a permanent legend displaying the current status for all active bars."),
         function() return profile.legendEnabled end,
         function(v)
             profile.legendEnabled = v

@@ -1,6 +1,28 @@
 <h1>@project-version@</h1>
 <ul>
-    <li>Bug fix: Missing file on the repo, the custom grid tab</li>
+<h3>Added</h3>
+  <ul>
+    <li>Feature: Added detailed tooltips to all checkboxes across all configuration modules.</li>
+    <li>Feature: Add a color bar detail to better identify each bar in the config panel.</li>
+    <li>Feature: Added "Master Mode" toggle for the Custom Grid system to quickly enable/disable all grid overrides.</li>
+    <li>Feature: Implemented a massive Faction Color Database (100+ entries) for authentic, thematic reputation bar coloring.</li>
+    <li>UI: Added dynamic "Active Faction Colors" section in the Colors tab, allowing per-bar personalization for all currently active reputations.</li>
+    <li>UI: Integrated "Use Custom Faction Colors" master toggle in both Custom Grid and Colors modules for easy access.</li>
+    <li>Localization: Fully translated all new reputation color features into Spanish, German, Russian, and Portuguese.</li>
+  </ul>
+
+  <h3>Changed</h3>
+  <ul>
+    <li>Fix: Updated the appearance of the components of the config frames to match the AscensionSuite style.</li>
+    <li>UI Refactor: Standardized Custom Grid configuration with left-aligned headers and vertically aligned toggles for improved scannability.</li>
+    <li>Layout Improvement: Overhauled "Add Custom Reputation" section with a clean, horizontal card-style layout and optimized padding.</li>
+    <li>UI Polish: Perfected vertical alignment for Stepper and Button components in the Custom Grid "Add Reputation" section.</li>
+  </ul>
+
+  <h3>Fixed</h3>
+  <ul>
+    <li>Fix: Resolved a layout regression where bars would fail to revert to standard vertical stacking when disabling the Custom Grid.</li>
+  </ul>
 </ul>
 <br>
 <h2>Positive feedback is always appreciated, it helps me to continue working on this project</h2>

@@ -283,7 +283,8 @@ function ReputationModule:renderSingleRepBarLive(repKey, targetFactionId)
             if C_Reputation and C_Reputation.GetWatchedFactionData then
                 local watchedData = C_Reputation.GetWatchedFactionData()
                 if watchedData then
-                    local normalized = self:getFactionData(watchedData.factionID)
+                    targetFactionId = watchedData.factionID
+                    local normalized = self:getFactionData(targetFactionId)
                     if normalized then
                         name         = watchedData.name
                         reaction     = normalized.reaction
@@ -311,6 +312,17 @@ function ReputationModule:renderSingleRepBarLive(repKey, targetFactionId)
         local repColors   = profile.repColors
         local rBarColor   = profile.repBarColor or { r = 0, g = 1, b = 0, a = 1 }
         local color       = (useReaction and repColors and repColors[reaction]) or rBarColor
+
+        -- Custom Faction Color Override
+        if profile.useCustomFactionColors and targetFactionId then
+            local customColor = profile.factionColors and profile.factionColors[targetFactionId]
+            if not customColor and core.constants.FACTION_COLORS then
+                customColor = core.constants.FACTION_COLORS[targetFactionId]
+            end
+            if customColor then
+                color = customColor
+            end
+        end
 
         self.core:setupBar(repObj, 0, max, cur, color)
 
@@ -371,6 +383,19 @@ function ReputationModule:renderSingleRepBarConfig(repKey)
     if repObj.txFrame then repObj.txFrame:Show() end
 
     local repColor = profile.repBarColor or { r = 0, g = 1, b = 0, a = 1 }
+    
+    -- Apply custom color override if enabled and ID exists
+    local factionId = tonumber(string.match(repKey, "^Rep_(%d+)$"))
+    if profile.useCustomFactionColors and factionId then
+        local customColor = profile.factionColors and profile.factionColors[factionId]
+        if not customColor and core.constants.FACTION_COLORS then
+            customColor = core.constants.FACTION_COLORS[factionId]
+        end
+        if customColor then
+            repColor = customColor
+        end
+    end
+
     self.core:setupBar(repObj, 0, 100, 50, repColor)
 
     local targetName = repConfig.name or Locales["REPUTATION"] or "Reputation"

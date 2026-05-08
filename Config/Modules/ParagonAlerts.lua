@@ -57,7 +57,7 @@ function paragonAlertsTab:build(panel)
 
     -- Ponemos el checkbox en la misma fila que el header
     col1Layout.y = headerY + 7
-    col1Layout:checkbox("SplitLinesCheckbox", locales["SPLIT_LINES"], nil,
+    col1Layout:checkbox("SplitLinesCheckbox", locales["SPLIT_LINES"], locales["SPLIT_LINES_DESC"],
         function() return profile.splitParagonText end,
         function(v)
             profile.splitParagonText = v

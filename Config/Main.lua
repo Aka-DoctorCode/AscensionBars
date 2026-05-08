@@ -123,19 +123,20 @@ function CreateConfigFrame()
         end
     end)
 
-    local configModeCheck = CreateFrame("CheckButton", nil, configFrame, "UICheckButtonTemplate")
-    configModeCheck:SetSize(menuStyle.checkboxSize, menuStyle.checkboxSize)
+    local configModeCheck = UIContext:createCheckbox({
+        parent = configFrame,
+        text = locales["CONFIG_MODE"],
+        tooltip = locales["CONFIG_MODE_DESC"],
+        getter = function() return ascensionBars.state.isConfigMode end,
+        setter = function(v)
+            ascensionBars.state.isConfigMode = v
+            ascensionBars:updateDisplay(true)
+        end,
+        xOffset = 6,
+        yOffset = 6
+    })
+    configModeCheck:ClearAllPoints()
     configModeCheck:SetPoint("BOTTOMLEFT", configFrame, "BOTTOMLEFT", 6, 6)
-
-    configModeCheck.text = configFrame:CreateFontString(nil, "OVERLAY", menuStyle.labelFont)
-    configModeCheck.text:SetPoint("LEFT", configModeCheck, "RIGHT", 2, 0)
-    configModeCheck.text:SetText(locales["CONFIG_MODE"])
-    configModeCheck:SetChecked(ascensionBars.state.isConfigMode)
-
-    configModeCheck:SetScript("OnClick", function(self)
-        ascensionBars.state.isConfigMode = self:GetChecked()
-        ascensionBars:updateDisplay(true)
-    end)
 
     configFrame:SetScript("OnShow", function(self)
         configModeCheck:SetChecked(ascensionBars.state.isConfigMode)

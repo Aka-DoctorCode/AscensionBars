@@ -502,7 +502,7 @@ function ascensionBars:updateLayout(shouldHideXP)
 
     local function renderBlock(blockData, blockName, startAnchor, anchorFrame, direction)
         local gridOpts = profile.customGrids and profile.customGrids[blockName]
-        if gridOpts and gridOpts.enabled then
+        if profile.customGridMasterEnabled and gridOpts and gridOpts.enabled then
             layoutGridBlock(blockData, blockName, startAnchor, anchorFrame, direction)
         else
             layoutBlock(blockData, blockName, startAnchor, anchorFrame, direction)

@@ -146,7 +146,7 @@ local function buildPresetControls(panel, blockKey, grid, blockX, blockWidth, la
     local afterDropdownY = layoutCol.y
 
     if grid.preset == "CUSTOM" then
-        layoutCol.y = presetRowY
+        layoutCol.y = presetRowY + 3 -- Nudge up for alignment with dropdown
         local rightColX = blockX + menuStyle.contentPadding / 2 + (blockWidth / 2)
 
         layoutCol:stepper("GridRows_" .. blockKey, locales["GRID_ROWS"] or "Rows", 1, 7, 1,
@@ -230,6 +230,12 @@ local function buildCellGrid(panel, blockKey, grid, blockX, blockWidth, barKeys,
                     grid.assignments[r][c] = selectedValue
                     ascensionBars:updateDisplay()
                     if panel and panel.updateLayout then panel:updateLayout() end
+
+                    -- Refresh Bars Layout if initialized to show/hide cards immediately
+                    if ascensionBars.configTabs and ascensionBars.configTabs.panels and ascensionBars.configTabs.panels[1] then
+                        local barsPanel = ascensionBars.configTabs.panels[1]
+                        if barsPanel.updateLayout then barsPanel:updateLayout() end
+                    end
                 end)
         end
         
@@ -302,15 +308,13 @@ local function buildGridBlock(panel, blockKey, blockName, startY, availableWidth
     -- Block header
     local header = panel.content:CreateFontString(nil, "OVERLAY", menuStyle.headerFont)
     header:SetPoint("TOPLEFT", menuStyle.contentPadding, startY)
-    header:SetWidth(availableWidth - menuStyle.contentPadding * 2)
-    header:SetJustifyH("CENTER")
+    header:SetJustifyH("LEFT")
     header:SetText(blockName)
-    header:SetTextColor(_G.unpack(colors.gold)) -- #FFD100
-    layoutCol.y = startY - menuStyle.headerSpacing
+    header:SetTextColor(_G.unpack(colors.gold))
 
-    -- Enable checkbox
-    layoutCol:checkbox("GridToggle_" .. blockKey, locales["CUSTOM_GRID_ENABLE"] or "Enable Custom Grid Layout",
-        locales["CUSTOM_GRID_DESC"] or "",
+    -- Enable checkbox (aligned horizontally with header)
+    local toggle, nextY = layoutCol:checkbox("GridToggle_" .. blockKey, locales["CUSTOM_GRID_ENABLE"] or "Enable Custom Grid Layout",
+        locales["ENABLE_ADVANCED_GRID_DESC"] or "",
         function() return grid.enabled end,
         function(v)
             grid.enabled = v
@@ -320,15 +324,25 @@ local function buildGridBlock(panel, blockKey, blockName, startY, availableWidth
             end
             ascensionBars:updateDisplay()
             if panel and panel.updateLayout then panel:updateLayout() end
-        end, menuStyle.contentPadding)
+            
+            -- Refresh Bars Layout if initialized
+            if ascensionBars.configTabs and ascensionBars.configTabs.panels and ascensionBars.configTabs.panels[1] then
+                local barsPanel = ascensionBars.configTabs.panels[1]
+                if barsPanel.updateLayout then barsPanel:updateLayout() end
+            end
+        end, 0)
 
-    layoutCol.y = layoutCol.y - menuStyle.labelSpacing
+    toggle:ClearAllPoints()
+    toggle:SetPoint("LEFT", header, "LEFT", 180, 2)
+    
+    -- Ensure layout.y starts after this combined row with a tight 3px gap
+    layoutCol.y = math.min(startY - 28, layoutCol.y) - 3
 
     if grid.enabled then
         buildPresetControls(panel, blockKey, grid, menuStyle.contentPadding, availableWidth, layoutCol)
         
         -- Counter-act factory padding to keep grid close to presets
-        layoutCol.y = layoutCol.y + 12 
+        layoutCol.y = layoutCol.y + 6 
 
         local barKeys, barNames, barNamesMap = {}, {}, {}
         for k, cfg in _G.pairs(profile.bars) do
@@ -392,23 +406,37 @@ local function buildReputationSection(panel, startY, availableWidth)
     layoutRep.y = layoutRep.y - menuStyle.labelSpacing
 
     layoutRep:beginSection(menuStyle.contentPadding, availableWidth - menuStyle.contentPadding * 2)
-    layoutRep.y = layoutRep.y - menuStyle.labelSpacing
+    layoutRep.y = layoutRep.y - 12 -- Equalized top margin
+
+    layoutRep:header("CustomRepColorsHeader", locales["CUSTOM_FACTION_COLORS"] or "Custom Faction Colors", menuStyle.contentPadding + 10)
+    layoutRep.y = layoutRep.y - 3
+    layoutRep:checkbox("UseCustomFactionColorsToggle", locales["USE_CUSTOM_FACTION_COLORS"], locales["USE_CUSTOM_FACTION_COLORS_DESC"],
+        function() return profile.useCustomFactionColors end,
+        function(v) 
+            profile.useCustomFactionColors = v
+            ascensionBars:updateDisplay()
+            if panel and panel.updateLayout then panel:updateLayout() end
+        end,
+        menuStyle.contentPadding + 10)
+    layoutRep.y = layoutRep.y - 10
 
     -- Search row
-    local searchRowY = layoutRep.y
-    local marginX = menuStyle.contentPadding
-    local spacing = menuStyle.checkboxSpacing / 2
-    local searchWidth = 180
-    local buttonWidth = 100
-    local dropdownWidth = availableWidth - searchWidth - buttonWidth - (spacing * 3) - menuStyle.contentPadding * 2
+    local rowY = layoutRep.y
+    local marginX = menuStyle.contentPadding + 10 -- Centered horizontally
+    local spacing = 10 -- Equal gap between elements
+    local searchWidth = 160
+    local buttonWidth = 70
+    local dropdownWidth = availableWidth - searchWidth - buttonWidth - (spacing * 2) - (marginX * 2)
 
-    layoutRep.y = searchRowY
+    -- 1. Input (Search)
+    layoutRep.y = rowY
     layoutRep:input("SearchFactionInput", locales["SEARCH_FACTION"] or "Search:", searchWidth, marginX, function(text)
         customGridTab.searchFactionText = text
         _G.C_Timer.After(0.01, function()
             if panel and panel.updateLayout then panel:updateLayout() end
         end)
     end)
+    local inputEndY = layoutRep.y
 
     if not _G.next(customGridTab.factionCache) then
         updateFactionCache()
@@ -429,17 +457,18 @@ local function buildReputationSection(panel, startY, availableWidth)
     table.sort(filteredFactions, function(a, b) return a.sortName < b.sortName end)
     table.insert(filteredFactions, 1, { label = locales["NONE"] or "None", value = 0 })
 
-    -- Dropdown
+    -- 2. Dropdown
     local dropdownX = marginX + searchWidth + spacing
-    layoutRep.y = searchRowY + menuStyle.contentPadding / 4
+    layoutRep.y = rowY
     layoutRep:dropdown("FactionSelectDropdown", nil, filteredFactions,
         function() return customGridTab.selectedFactionToAdd end,
         function(v) customGridTab.selectedFactionToAdd = v end, dropdownWidth, dropdownX)
+    local dropdownEndY = layoutRep.y
 
-    -- Add button
+    -- 3. Add button
     local buttonX = dropdownX + dropdownWidth + spacing
-    layoutRep.y = searchRowY - menuStyle.buttonHeight / 2
-    layoutRep:button("AddFactionBtn", locales["ADD"] or "Add", buttonWidth, menuStyle.buttonHeight, buttonX, function()
+    layoutRep.y = rowY - 7 -- Corrected vertical alignment
+    layoutRep:button("AddFactionBtn", locales["ADD"] or "Add", buttonWidth, 24, buttonX, function()
         local fID = customGridTab.selectedFactionToAdd
         if fID and fID > 0 then
             local key = "Rep_" .. fID
@@ -467,9 +496,13 @@ local function buildReputationSection(panel, startY, availableWidth)
             end
         end
     end)
+    local buttonEndY = layoutRep.y
 
-    layoutRep.y = searchRowY - menuStyle.headerSpacing
+    -- Finalize layout Y based on deepest element
+    layoutRep.y = math.min(inputEndY, math.min(dropdownEndY, buttonEndY)) - 12 -- Equalized bottom margin
+
     layoutRep:endSection()
+
 
     return layoutRep.y
 end
@@ -506,32 +539,29 @@ function customGridTab:build(panel)
     headerTitle:SetText(locales["CUSTOM_GRID"] or "Custom Grid")
     headerTitle:SetTextColor(_G.unpack(colors.gold)) -- #FFD100
 
-    local masterToggle = _G.CreateFrame("CheckButton", nil, headerFrame, "UICheckButtonTemplate")
-    masterToggle:SetSize(menuStyle.checkboxSize, menuStyle.checkboxSize)
-    masterToggle:SetPoint("LEFT", headerFrame, "LEFT", 160, -2)
-    masterToggle:SetChecked(profile.customGridMasterEnabled)
+    local masterToggle = addonTable.UIContext:createCheckbox({
+        parent = headerFrame,
+        text = locales["ENABLE_ADVANCED_GRID"] or "Enable Advanced Mode",
+        tooltip = locales["ENABLE_ADVANCED_GRID_DESC"],
+        getter = function() return profile.customGridMasterEnabled end,
+        setter = function(v)
+            profile.customGridMasterEnabled = v
+            ascensionBars:updateDisplay()
+            if panel.updateLayout then panel:updateLayout() end
 
-    local toggleLabel = masterToggle:CreateFontString(nil, "OVERLAY", menuStyle.labelFont)
-    toggleLabel:SetPoint("LEFT", masterToggle, "RIGHT", menuStyle.contentPadding / 2, 0)
-    toggleLabel:SetText(locales["ENABLE_ADVANCED_GRID"] or "Enable Advanced Mode")
-    toggleLabel:SetTextColor(unpack(colors.textLight))
+            -- Refresh Bars Layout if initialized
+            if ascensionBars.configTabs and ascensionBars.configTabs.panels and ascensionBars.configTabs.panels[1] then
+                local barsPanel = ascensionBars.configTabs.panels[1]
+                if barsPanel.updateLayout then barsPanel:updateLayout() end
+            end
+        end,
+        xOffset = 0,
+        yOffset = 0
+    })
+    masterToggle:ClearAllPoints()
+    masterToggle:SetPoint("LEFT", headerTitle, "LEFT", 180, 2)
 
-    masterToggle:SetScript("OnClick", function(self)
-        profile.customGridMasterEnabled = self:GetChecked()
-        ascensionBars:updateDisplay()
-        if panel.updateLayout then panel:updateLayout() end
-    end)
-
-    layout.y = headerY - headerFrame:GetHeight() - menuStyle.contentPadding
-
-    -- Description
-    local desc = panel.content:CreateFontString(nil, "OVERLAY", menuStyle.descFont)
-    desc:SetPoint("TOPLEFT", menuStyle.contentPadding, layout.y)
-    desc:SetWidth(defaultAvailableSpace - menuStyle.contentPadding * 2)
-    desc:SetJustifyH("LEFT")
-    desc:SetText(locales["CUSTOM_GRID_DESC"] or "Arrange bars in rows and columns. This layout overrides the standard bar order for the selected block.")
-    desc:SetTextColor(unpack(colors.textDim))
-    layout.y = layout.y - (desc:GetHeight() + menuStyle.labelSpacing)
+    layout.y = headerY - headerFrame:GetHeight() - 6
 
     -- -------------------------------------------------------------------------------
     -- GRID SECTIONS (if enabled)
@@ -550,14 +580,6 @@ function customGridTab:build(panel)
         end
 
         layout.y = currentY
-    else
-        local disabledMsg = panel.content:CreateFontString(nil, "OVERLAY", menuStyle.descFont)
-        disabledMsg:SetPoint("TOPLEFT", menuStyle.contentPadding, layout.y)
-        disabledMsg:SetWidth(defaultAvailableSpace - menuStyle.contentPadding * 2)
-        disabledMsg:SetJustifyH("CENTER")
-        disabledMsg:SetText(locales["CUSTOM_GRID_DISABLED_MSG"] or "Enable Custom Grid (Advanced) above to configure custom layouts.")
-        disabledMsg:SetTextColor(unpack(colors.textDim))
-        layout.y = layout.y - (disabledMsg:GetHeight() + menuStyle.labelSpacing)
     end
 
     -- -------------------------------------------------------------------------------
