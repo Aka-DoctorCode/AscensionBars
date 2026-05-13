@@ -37,11 +37,11 @@ function CreateConfigFrame()
     configFrame:SetBackdrop({
         bgFile = files.bgFile,
         edgeFile = files.edgeFile,
-        edgeSize = menuStyle.backdropEdgeSize,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        edgeSize = 3,
+        insets = { left = 2, right = 2, top = 3, bottom = 3 }
     })
-    configFrame:SetBackdropColor(unpack(colors.backgroundDark))
-    configFrame:SetBackdropBorderColor(unpack(colors.surfaceHighlight))
+    configFrame:SetBackdropColor(unpack(colors.mainBackground))
+    configFrame:SetBackdropBorderColor(unpack(colors.sidebarAccent))
 
     configFrame:SetPropagateKeyboardInput(true)
     configFrame:SetScript("OnKeyDown", function(self, key)
@@ -68,7 +68,7 @@ function CreateConfigFrame()
         edgeSize = 1,
         insets   = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    closeButton:SetBackdropColor(unpack(colors.surfaceHighlight))
+    closeButton:SetBackdropColor(unpack(colors.surfaceLight))
     closeButton:SetBackdropBorderColor(unpack(colors.blackDetail))
 
     local xLine1 = closeButton:CreateTexture(nil, "OVERLAY")
@@ -99,7 +99,7 @@ function CreateConfigFrame()
         setCloseXColor(1, 0.4, 0.4)
     end)
     closeButton:SetScript("OnLeave", function(self)
-        self:SetBackdropColor(unpack(colors.surfaceHighlight))
+        self:SetBackdropColor(unpack(colors.surfaceLight))
         self:SetBackdropBorderColor(unpack(colors.blackDetail))
         setCloseXColor(unpack(colors.textLight))
     end)
