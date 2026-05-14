@@ -93,7 +93,7 @@ function paragonAlertsTab:build(panel)
         function()
             local c = profile.paragonPendingColor
             if not c then return 0, 0.8, 1, 1 end -- #00CCFF
-            return c.r, c.g, b, 1
+            return c.r, c.g, c.b, 1
         end,
         function(r, g, b)
             if not profile.paragonPendingColor then profile.paragonPendingColor = {} end

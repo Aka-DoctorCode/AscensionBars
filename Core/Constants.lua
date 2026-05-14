@@ -258,7 +258,7 @@ ascensionBars.constants = {
 
 ascensionBars.configFrame = nil
 ascensionBars.isMinimized = false
-ascensionBars.normalWidth = 850
+ascensionBars.normalWidth = 1000
 ascensionBars.normalHeight = 500
 ascensionBars.activeTab = 1
 ascensionBars.tabs = {}

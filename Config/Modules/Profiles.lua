@@ -29,7 +29,7 @@ local function createStyledButton(parent, w, h, labelText, onClick)
         edgeSize = 1,
         insets   = { left = 1, right = 1, top = 1, bottom = 1 }
     })
-    btn:SetBackdropColor(unpack(colors.surfaceHighlight))
+    btn:SetBackdropColor(unpack(colors.surfaceLight))
     btn:SetBackdropBorderColor(unpack(colors.blackDetail))
 
     local btnLabel = btn:CreateFontString(nil, "OVERLAY", menuStyle.labelFont)
@@ -43,7 +43,7 @@ local function createStyledButton(parent, w, h, labelText, onClick)
         self:SetBackdropBorderColor(unpack(colors.textLight))
     end)
     btn:SetScript("OnLeave", function(self)
-        self:SetBackdropColor(unpack(colors.surfaceHighlight))
+        self:SetBackdropColor(unpack(colors.surfaceLight))
         self:SetBackdropBorderColor(unpack(colors.blackDetail))
     end)
     btn:SetScript("OnMouseDown", function(self) self.label:SetPoint("CENTER", 1, -1) end)
@@ -104,7 +104,7 @@ local function showConfirmDialog(message, onConfirm)
         insets = { left = 2, right = 2, top = 2, bottom = 2 }
     })
     dialog:SetBackdropColor(unpack(colors.surfaceDark))
-    dialog:SetBackdropBorderColor(unpack(colors.surfaceHighlight))
+    dialog:SetBackdropBorderColor(unpack(colors.surfaceLight))
     dialog:SetFrameStrata("TOOLTIP") -- Raised to Tooltip level to prevent overlapping issues
 
     local text = dialog:CreateFontString(nil, "OVERLAY", menuStyle.labelFont)
@@ -219,7 +219,7 @@ local function showDataPopup(title, isImport)
             insets = { left = 2, right = 2, top = 2, bottom = 2 }
         })
         scrollBg:SetBackdropColor(0.15, 0.15, 0.15, 1) -- #262626
-        scrollBg:SetBackdropBorderColor(unpack(colors.surfaceHighlight))
+        scrollBg:SetBackdropBorderColor(unpack(colors.surfaceLight))
 
         -- Scroll and EditBox setup
         local scroll = CreateFrame("ScrollFrame", "AscensionBarsDataScroll", frame, "UIPanelScrollFrameTemplate")

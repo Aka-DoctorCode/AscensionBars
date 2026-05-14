@@ -294,7 +294,7 @@ function barsLayoutTab:build(panel)
     local profile = ascensionBars.db.profile
     if not profile then return end
 
-    local defaultAvailableSpace = (ascensionBars.normalWidth or 750) - (menuStyle.sidebarWidth or 150) - 30
+    local defaultAvailableSpace = (ascensionBars.normalWidth or 750) - (menuStyle.sidebarWidth or 150) - 40
     local colGap = 10
     local y = -15
 

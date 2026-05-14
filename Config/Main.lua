@@ -23,7 +23,7 @@ function CreateConfigFrame()
     ascensionBars.configFrame = CreateFrame("Frame", "AscensionBarsConfigFrame", _G.UIParent, "BackdropTemplate")
     local configFrame = ascensionBars.configFrame
     configFrame:SetFrameStrata("DIALOG")
-    configFrame:SetSize(ascensionBars.normalWidth or 850, ascensionBars.normalHeight or 500)
+    configFrame:SetSize(ascensionBars.normalWidth or 860, ascensionBars.normalHeight or 500)
     configFrame:SetPoint("CENTER")
     configFrame:SetMovable(true)
     configFrame:EnableMouse(true)

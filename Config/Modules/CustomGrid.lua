@@ -50,7 +50,7 @@ function customGridTab:createVisualCell(parentFrame, cellKey, cellWidth, cellHei
         cellButton.label = label
 
         cellButton:SetScript("OnEnter", function(self)
-            self.border:SetColorTexture(_G.unpack(colors.surfaceHighlight))
+            self.border:SetColorTexture(_G.unpack(colors.surfaceLight))
         end)
         cellButton:SetScript("OnLeave", function(self)
             self.border:SetColorTexture(_G.unpack(colors.blackDetail))
@@ -72,7 +72,7 @@ function customGridTab:createVisualCell(parentFrame, cellKey, cellWidth, cellHei
     if currentAssignment == "none" or not currentAssignment then
         cellButton.innerBg:SetColorTexture(_G.unpack(colors.surfaceDark))
         cellButton.label:SetText("+ " .. (locales["EMPTY"] or "Empty"))
-        cellButton.label:SetTextColor(_G.unpack(colors.textDim))
+        cellButton.label:SetTextColor(_G.unpack(colors.textLight or {0.6, 0.6, 0.6, 1}))
     else
         cellButton.innerBg:SetColorTexture(_G.unpack(colors.primary))
         cellButton.innerBg:SetAlpha(0.5)
