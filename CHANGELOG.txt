@@ -1,8 +1,6 @@
-<h1>V53</h1>
+<h1>@project-version@</h1>
 <ul>
-    <li>Bug fix: Updated color references to match new AscensionSuite theme (surfaceLight).</li>
-    <li>Bug fix: Resolved logic error in Paragon Alerts color picker.</li>
-    <li>Bug fix: Fixed nil error in Profiles and Custom Grid UI initialization.</li>
+    <li>Update TOC for 12.0.7</li>
 </ul>
 <br>
 <h2>Positive feedback is always appreciated, it helps me to continue working on this project</h2>
